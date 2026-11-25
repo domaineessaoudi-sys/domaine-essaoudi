@@ -58,10 +58,16 @@ import type { OrderItemPayload, OrderItemSummary, OrderStatus } from './src/type
 
 const app = express();
 const PORT = Number(process.env.PORT || 3000);
-const uploadsDir = path.resolve(process.cwd(), 'uploads');
+const uploadsDir = process.env.VERCEL
+  ? path.resolve('/tmp', 'uploads')
+  : path.resolve(process.cwd(), 'uploads');
 
 if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir, { recursive: true });
+  try {
+    fs.mkdirSync(uploadsDir, { recursive: true });
+  } catch {
+    // Ignore error in serverless environment
+  }
 }
 
 app.use(express.json({ limit: '5mb' }));
@@ -776,4 +782,9 @@ async function startServer() {
   });
 }
 
-startServer();
+if (!process.env.VERCEL && process.env.NODE_ENV !== 'test') {
+  startServer();
+}
+
+export default app;
+export { app };

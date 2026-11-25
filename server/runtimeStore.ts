@@ -27,7 +27,10 @@ interface RuntimeState {
   supabaseConfig: StoredSupabaseConfig;
 }
 
-const dataDir = path.resolve(process.cwd(), 'data');
+const isVercel = Boolean(process.env.VERCEL);
+const dataDir = isVercel
+  ? path.resolve('/tmp', 'data')
+  : path.resolve(process.cwd(), 'data');
 const statePath = path.join(dataDir, 'runtime-state.json');
 
 const EMPTY_STATE: RuntimeState = {
@@ -42,14 +45,20 @@ const EMPTY_STATE: RuntimeState = {
   },
 };
 
+let memoryState: RuntimeState | null = null;
+
 function readState(): RuntimeState {
+  if (memoryState) {
+    return memoryState;
+  }
   try {
     if (!fs.existsSync(statePath)) {
-      return structuredClone(EMPTY_STATE);
+      memoryState = structuredClone(EMPTY_STATE);
+      return memoryState;
     }
     const raw = fs.readFileSync(statePath, 'utf8');
     const parsed = JSON.parse(raw) as Partial<RuntimeState>;
-    return {
+    memoryState = {
       adminAuth: parsed.adminAuth || null,
       adminSessions: Array.isArray(parsed.adminSessions) ? parsed.adminSessions : [],
       supabaseConfig: {
@@ -57,16 +66,23 @@ function readState(): RuntimeState {
         ...(parsed.supabaseConfig || {}),
       },
     };
+    return memoryState;
   } catch {
-    return structuredClone(EMPTY_STATE);
+    memoryState = structuredClone(EMPTY_STATE);
+    return memoryState;
   }
 }
 
 function writeState(next: RuntimeState): void {
-  if (!fs.existsSync(dataDir)) {
-    fs.mkdirSync(dataDir, { recursive: true });
+  memoryState = next;
+  try {
+    if (!fs.existsSync(dataDir)) {
+      fs.mkdirSync(dataDir, { recursive: true });
+    }
+    fs.writeFileSync(statePath, JSON.stringify(next, null, 2), { mode: 0o600 });
+  } catch {
+    // Ignore persistence errors in read-only serverless environments
   }
-  fs.writeFileSync(statePath, JSON.stringify(next, null, 2), { mode: 0o600 });
 }
 
 export function getStoredAdminAuth(): StoredAdminAuth | null {
@@ -115,14 +131,33 @@ export function removeAdminSession(tokenHash: string): void {
 export function getStoredSupabaseConfig(): StoredSupabaseConfig {
   const cfg = readState().supabaseConfig;
   return {
-    projectUrl: (cfg.projectUrl || process.env.SUPABASE_URL || '').trim(),
-    anonKey: (cfg.anonKey || process.env.SUPABASE_ANON_KEY || '').trim(),
+    projectUrl: (
+      cfg.projectUrl ||
+      process.env.SUPABASE_URL ||
+      process.env.VITE_SUPABASE_URL ||
+      process.env.NEXT_PUBLIC_SUPABASE_URL ||
+      ''
+    ).trim(),
+    anonKey: (
+      cfg.anonKey ||
+      process.env.SUPABASE_ANON_KEY ||
+      process.env.VITE_SUPABASE_ANON_KEY ||
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+      ''
+    ).trim(),
     serviceRoleKey: (
       cfg.serviceRoleKey ||
       process.env.SUPABASE_SERVICE_ROLE_KEY ||
+      process.env.SUPABASE_KEY ||
       ''
     ).trim(),
-    postgresUri: (cfg.postgresUri || process.env.SUPABASE_DB_URL || '').trim(),
+    postgresUri: (
+      cfg.postgresUri ||
+      process.env.SUPABASE_DB_URL ||
+      process.env.POSTGRES_URL ||
+      process.env.DATABASE_URL ||
+      ''
+    ).trim(),
     updatedAt: cfg.updatedAt || '',
   };
 }
