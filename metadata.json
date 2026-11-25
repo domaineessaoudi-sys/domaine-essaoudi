@@ -1,0 +1,6 @@
+{
+  "name": "Domaine Essaoudi",
+  "description": "Authentic Moroccan agricultural estate specializing in fresh organic seasonal vegetables, traditional cold-pressed Beldi olive oil, and free-range Beldi poultry.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
