@@ -72,6 +72,14 @@ if (!fs.existsSync(uploadsDir)) {
 
 app.use(express.json({ limit: '5mb' }));
 
+app.use((req, _res, next) => {
+  const matched = req.headers['x-matched-path'] || req.headers['x-forwarded-url'];
+  if (typeof matched === 'string' && matched.startsWith('/api') && req.url === '/api') {
+    req.url = matched;
+  }
+  next();
+});
+
 function isSafeImageUrl(url: string): boolean {
   const trimmed = url.trim();
   if (trimmed.startsWith('/src/assets/') || trimmed.startsWith('/uploads/')) {
