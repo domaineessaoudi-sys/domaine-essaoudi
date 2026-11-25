@@ -365,7 +365,7 @@ function getStoredSupabaseConfig() {
   const cfg = readState().supabaseConfig;
   return {
     projectUrl: (cfg.projectUrl || process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || "https://dfqyzoxomnqnkfhtyfti.supabase.co").trim(),
-    anonKey: (cfg.anonKey || process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "").trim(),
+    anonKey: (cfg.anonKey || process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "sb_publishable_Tjdiha-yeXW2Ug8lMrf9Iw_DYlsSlnE").trim(),
     serviceRoleKey: (cfg.serviceRoleKey || process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY || "").trim(),
     postgresUri: (cfg.postgresUri || process.env.SUPABASE_DB_URL || process.env.POSTGRES_URL || process.env.DATABASE_URL || "").trim(),
     updatedAt: cfg.updatedAt || ""
@@ -631,9 +631,12 @@ async function listProducts(options) {
   if (cfg.projectUrl && (cfg.serviceRoleKey || cfg.anonKey)) {
     try {
       const res = await supabaseRest("products?select=*&order=category.asc,name_fr.asc");
-      if (res.ok && Array.isArray(res.data) && res.data.length > 0) {
+      if (res.ok && Array.isArray(res.data)) {
         const rows = res.data.map((r) => rowToProduct(r));
         return filterRows(rows);
+      }
+      if (!res.ok) {
+        console.warn("Supabase REST query failed:", res.status, res.errorText);
       }
     } catch (restErr) {
       console.warn("Supabase REST query notice (falling back):", restErr instanceof Error ? restErr.message : restErr);

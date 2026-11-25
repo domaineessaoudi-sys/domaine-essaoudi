@@ -143,7 +143,7 @@ export function getStoredSupabaseConfig(): StoredSupabaseConfig {
       process.env.SUPABASE_ANON_KEY ||
       process.env.VITE_SUPABASE_ANON_KEY ||
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
-      ''
+      'sb_publishable_Tjdiha-yeXW2Ug8lMrf9Iw_DYlsSlnE'
     ).trim(),
     serviceRoleKey: (
       cfg.serviceRoleKey ||

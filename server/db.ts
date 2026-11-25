@@ -297,9 +297,12 @@ export async function listProducts(options?: {
   if (cfg.projectUrl && (cfg.serviceRoleKey || cfg.anonKey)) {
     try {
       const res = await supabaseRest('products?select=*&order=category.asc,name_fr.asc');
-      if (res.ok && Array.isArray(res.data) && res.data.length > 0) {
+      if (res.ok && Array.isArray(res.data)) {
         const rows = res.data.map((r) => rowToProduct(r as Record<string, unknown>));
         return filterRows(rows);
+      }
+      if (!res.ok) {
+        console.warn('Supabase REST query failed:', res.status, res.errorText);
       }
     } catch (restErr) {
       console.warn('Supabase REST query notice (falling back):', restErr instanceof Error ? restErr.message : restErr);
