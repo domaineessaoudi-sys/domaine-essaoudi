@@ -47,10 +47,10 @@ test('validatePostgresConnectionUri accepts Supabase Postgres URIs and rejects p
   );
 });
 
-test('buildSupabaseRestHeaders omits Bearer for sb_publishable/sb_secret keys and includes it for JWT keys', () => {
+test('buildSupabaseRestHeaders includes apikey and Bearer Authorization for all keys', () => {
   const pubHeaders = buildSupabaseRestHeaders('sb_publishable_Tjdiha_test');
   assert.equal(pubHeaders.apikey, 'sb_publishable_Tjdiha_test');
-  assert.equal('Authorization' in pubHeaders, false);
+  assert.equal(pubHeaders.Authorization, 'Bearer sb_publishable_Tjdiha_test');
 
   const jwtHeaders = buildSupabaseRestHeaders('eyJhbGciOiJIUzI1NiJ9.payload.sig');
   assert.equal(jwtHeaders.apikey, 'eyJhbGciOiJIUzI1NiJ9.payload.sig');

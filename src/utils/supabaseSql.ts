@@ -255,11 +255,9 @@ export function buildSupabaseRestHeaders(
   const key = apiKey.trim();
   const headers: Record<string, string> = {
     apikey: key,
+    Authorization: `Bearer ${key}`,
     ...extra,
   };
-  if (key.startsWith('eyJ')) {
-    headers.Authorization = `Bearer ${key}`;
-  }
   return headers;
 }
 
