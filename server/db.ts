@@ -322,11 +322,18 @@ function parseJsonField<T>(val: unknown, fallback: T): T {
   return fallback;
 }
 
+function getDefaultImageForCategory(category: string): string {
+  if (category === 'olive-oil') return '/src/assets/images/cat_olive_oil_beldi_1795435654212.jpg';
+  if (category === 'poultry') return '/src/assets/images/cat_poulet_beldi_1795435654032.jpg';
+  return '/src/assets/images/cat_fresh_vegetables_1795435654556.jpg';
+}
+
 function rowToProduct(row: Record<string, unknown>): Product {
+  const category = (row.category || 'vegetables') as ProductCategory;
   return {
     id: String(row.id),
     slug: String(row.slug),
-    category: row.category as ProductCategory,
+    category,
     subcategory: String(row.subcategory || 'general'),
     name_fr: String(row.name_fr || ''),
     name_en: String(row.name_en || row.name_fr || ''),
@@ -338,10 +345,10 @@ function rowToProduct(row: Record<string, unknown>): Product {
     unit_fr: String(row.unit_fr || '1 kg'),
     unit_en: String(row.unit_en || '1 kg'),
     unit_ar: String(row.unit_ar || '1 كغ'),
-    stock: Number(row.stock || 0),
-    available: Boolean(row.available),
+    stock: Number(row.stock !== undefined && row.stock !== null ? row.stock : 100),
+    available: row.available === undefined || row.available === null ? true : Boolean(row.available),
     featured: Boolean(row.featured),
-    image_url: String(row.image_url || '/src/assets/images/cat_fresh_vegetables_1795435654556.jpg'),
+    image_url: String(row.image_url || getDefaultImageForCategory(category)),
     variants: parseJsonField(row.variants_json, []),
     harvest_note_fr: String(row.harvest_note_fr || ''),
     harvest_note_en: String(row.harvest_note_en || ''),
@@ -762,25 +769,32 @@ export async function getSiteContent(): Promise<SiteContent> {
   const cfg = getStoredSupabaseConfig();
 
   if (cfg.postgresUri) {
-    const resRows = await withPg(async (client) => {
-      const r = await client.query('SELECT value_json FROM public.site_content WHERE key = $1', [
-        'main',
-      ]);
-      return r.rows;
-    });
-    if (resRows.length > 0) {
-      const parsed = parseJsonField<Partial<SiteContent>>(resRows[0].value_json, {});
-      return normalizeSocialSiteContent({ ...BASE_SITE_CONTENT, ...parsed });
+    try {
+      const resRows = await withPg(async (client) => {
+        const r = await client.query('SELECT value_json FROM public.site_content WHERE key = $1', [
+          'main',
+        ]);
+        return r.rows;
+      });
+      if (resRows.length > 0) {
+        const parsed = parseJsonField<Partial<SiteContent>>(resRows[0].value_json, {});
+        return normalizeSocialSiteContent({ ...BASE_SITE_CONTENT, ...parsed });
+      }
+    } catch (pgErr) {
+      console.warn('Postgres site_content query notice:', pgErr instanceof Error ? pgErr.message : pgErr);
     }
-    return BASE_SITE_CONTENT;
   }
 
   if (cfg.projectUrl && (cfg.serviceRoleKey || cfg.anonKey)) {
-    const res = await supabaseRest('site_content?key=eq.main&select=value_json&limit=1');
-    if (res.ok && Array.isArray(res.data) && res.data[0]) {
-      const row = res.data[0] as Record<string, unknown>;
-      const parsed = parseJsonField<Partial<SiteContent>>(row.value_json, {});
-      return normalizeSocialSiteContent({ ...BASE_SITE_CONTENT, ...parsed });
+    try {
+      const res = await supabaseRest('site_content?key=eq.main&select=value_json&limit=1');
+      if (res.ok && Array.isArray(res.data) && res.data[0]) {
+        const row = res.data[0] as Record<string, unknown>;
+        const parsed = parseJsonField<Partial<SiteContent>>(row.value_json, {});
+        return normalizeSocialSiteContent({ ...BASE_SITE_CONTENT, ...parsed });
+      }
+    } catch (restErr) {
+      console.warn('Supabase REST site_content notice:', restErr instanceof Error ? restErr.message : restErr);
     }
   }
 
