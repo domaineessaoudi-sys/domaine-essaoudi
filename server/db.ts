@@ -920,9 +920,9 @@ export async function updateContactMessageStatus(
 
 export async function getAdminStats(): Promise<AdminStats> {
   const [products, orders, messages] = await Promise.all([
-    listProducts({ includeUnavailable: true }),
-    listOrders(),
-    listContactMessages(),
+    listProducts({ includeUnavailable: true }).catch(() => []),
+    listOrders().catch(() => []),
+    listContactMessages().catch(() => []),
   ]);
 
   const categoryCounts: Record<ProductCategory, number> = {

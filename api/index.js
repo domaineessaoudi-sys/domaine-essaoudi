@@ -1177,9 +1177,9 @@ async function updateContactMessageStatus(id, status) {
 }
 async function getAdminStats() {
   const [products, orders, messages] = await Promise.all([
-    listProducts({ includeUnavailable: true }),
-    listOrders(),
-    listContactMessages()
+    listProducts({ includeUnavailable: true }).catch(() => []),
+    listOrders().catch(() => []),
+    listContactMessages().catch(() => [])
   ]);
   const categoryCounts = {
     vegetables: 0,
