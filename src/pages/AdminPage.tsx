@@ -37,6 +37,8 @@ import {
   TrendingUp,
   Upload,
   User,
+  UserPlus,
+  Users,
   X,
   Zap,
 } from 'lucide-react';
@@ -78,7 +80,7 @@ const PRESET_IMAGES = [
   },
 ];
 
-type AdminTab = 'overview' | 'products' | 'orders' | 'content' | 'sql';
+type AdminTab = 'overview' | 'products' | 'orders' | 'content' | 'sql' | 'users';
 
 interface EmailStatusInfo {
   configured: boolean;
@@ -237,6 +239,24 @@ export function AdminPage() {
     error?: string;
   } | null>(null);
 
+  // ---- Users (admin_auth) state ----
+  interface AdminUser {
+    id: string;
+    username: string;
+    email: string;
+    role: 'admin' | 'editor' | 'viewer';
+    created_at: string;
+    updated_at: string;
+  }
+  const [adminUsers, setAdminUsers] = useState<AdminUser[]>([]);
+  const [usersLoading, setUsersLoading] = useState(false);
+  const [usersError, setUsersError] = useState<string | null>(null);
+  const [showUserForm, setShowUserForm] = useState(false);
+  const [editingUser, setEditingUser] = useState<AdminUser | null>(null);
+  const [userForm, setUserForm] = useState({ username: '', email: '', password: '', role: 'viewer' });
+  const [savingUser, setSavingUser] = useState(false);
+  const [deletingUserId, setDeletingUserId] = useState<string | null>(null);
+
   useEffect(() => {
     if (siteContent) setContentForm(siteContent);
   }, [siteContent]);
@@ -330,6 +350,24 @@ export function AdminPage() {
     }
   }, [adminToken, loadAdminWorkspace]);
 
+  // ---- Load users when tab is active ----
+  const loadUsers = useCallback(async () => {
+    if (!adminToken) return;
+    setUsersLoading(true);
+    setUsersError(null);
+    try {
+      const res = await fetch('/api/admin/users', { headers: { Authorization: `Bearer ${adminToken}` } });
+      const data = await res.json();
+      if (!res.ok) { setUsersError(data.error || 'Erreur chargement utilisateurs.'); return; }
+      setAdminUsers(data.users || []);
+    } catch { setUsersError('Erreur réseau.'); }
+    finally { setUsersLoading(false); }
+  }, [adminToken]);
+
+  useEffect(() => {
+    if (activeTab === 'users' && adminToken) loadUsers();
+  }, [activeTab, adminToken, loadUsers]);
+
   const handleAuthSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setAuthError(null);
@@ -371,6 +409,55 @@ export function AdminPage() {
       }).catch(() => { });
     }
     setAdminToken(null);
+  };
+
+  // ---- Users handlers ----
+  const openAddUser = () => {
+    setEditingUser(null);
+    setUserForm({ username: '', email: '', password: '', role: 'viewer' });
+    setShowUserForm(true);
+  };
+  const openEditUser = (u: { id: string; username: string; email: string; role: string; created_at: string; updated_at: string }) => {
+    setEditingUser(u as any);
+    setUserForm({ username: u.username, email: u.email || '', password: '', role: u.role });
+    setShowUserForm(true);
+  };
+  const handleSaveUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!adminToken) return;
+    setSavingUser(true);
+    setUsersError(null);
+    try {
+      const isEdit = Boolean(editingUser);
+      const url = isEdit ? `/api/admin/users/${editingUser!.id}` : '/api/admin/users';
+      const method = isEdit ? 'PATCH' : 'POST';
+      const body: Record<string, string> = { username: userForm.username, email: userForm.email, role: userForm.role };
+      if (userForm.password) body.password = userForm.password;
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${adminToken}` },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json();
+      if (!res.ok) { setUsersError(data.error || 'Erreur sauvegarde.'); return; }
+      showToast(isEdit ? 'Utilisateur mis à jour' : 'Utilisateur créé');
+      setShowUserForm(false);
+      await loadUsers();
+    } catch { setUsersError('Erreur réseau.'); }
+    finally { setSavingUser(false); }
+  };
+  const handleDeleteUser = async (id: string) => {
+    if (!adminToken || !window.confirm('Supprimer cet utilisateur ?')) return;
+    setDeletingUserId(id);
+    try {
+      await fetch(`/api/admin/users/${id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${adminToken}` },
+      });
+      showToast('Utilisateur supprimé');
+      await loadUsers();
+    } catch { /* ignore */ }
+    finally { setDeletingUserId(null); }
   };
 
   const handleImageFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -809,7 +896,9 @@ export function AdminPage() {
                     ? 'COMMANDES'
                     : activeTab === 'content'
                       ? 'CONTENU'
-                      : 'SUPABASE SQL'}
+                      : activeTab === 'users'
+                        ? 'UTILISATEURS'
+                        : 'SUPABASE SQL'}
             </span>
           </div>
 
@@ -1007,6 +1096,7 @@ export function AdminPage() {
                 { key: 'products', label: 'Produits', icon: Package },
                 { key: 'orders', label: 'Commandes', icon: ShoppingCart },
                 { key: 'content', label: 'Contenu', icon: Sliders },
+                { key: 'users', label: 'Utilisateurs', icon: Users },
                 { key: 'sql', label: 'Supabase', icon: Database },
               ] as const
             ).map((item) => {
@@ -2488,6 +2578,212 @@ export function AdminPage() {
 
             {/* SQL EDITOR & SUPABASE TAB */}
             {activeTab === 'sql' && <AdminSqlEditor adminToken={adminToken} showToast={showToast} />}
+
+            {/* ═══════════════════════════════════════════════════════
+                UTILISATEURS TAB — CRUD table admin_auth
+            ═══════════════════════════════════════════════════════ */}
+            {activeTab === 'users' && (
+              <div className="space-y-6">
+                {/* Header */}
+                <div className="flex items-center justify-between gap-4 flex-wrap">
+                  <div>
+                    <h2 className="text-lg font-bold text-[#EEF6FA] flex items-center gap-2">
+                      <Users className="w-5 h-5 text-[#38BDF8]" />
+                      Gestion des utilisateurs
+                    </h2>
+                    <p className="text-xs text-[#7A98A8] mt-0.5">Table Supabase : <code className="text-sky-400">admin_auth</code></p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={openAddUser}
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-[#0284C7] to-[#0369A1] text-white text-sm font-semibold shadow-md shadow-sky-500/20 hover:from-[#0369A1] hover:to-[#025A87] transition-all"
+                  >
+                    <UserPlus className="w-4 h-4" />
+                    Ajouter un utilisateur
+                  </button>
+                </div>
+
+                {/* Error banner */}
+                {usersError && (
+                  <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+                    {usersError}
+                  </div>
+                )}
+
+                {/* Add / Edit Form */}
+                {showUserForm && (
+                  <div className="rounded-2xl border border-[#1E3444] bg-[#0D1E2A] p-5 sm:p-6 shadow-lg">
+                    <h3 className="text-sm font-bold text-[#EEF6FA] mb-4 flex items-center gap-2">
+                      {editingUser ? <Edit3 className="w-4 h-4 text-sky-400" /> : <UserPlus className="w-4 h-4 text-emerald-400" />}
+                      {editingUser ? `Modifier : ${editingUser.username}` : 'Nouvel utilisateur'}
+                    </h3>
+                    <form onSubmit={handleSaveUser} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {/* Username */}
+                      <div className="flex flex-col gap-1.5">
+                        <label className="text-xs font-semibold text-[#7A98A8] uppercase tracking-wide">Nom d'utilisateur *</label>
+                        <input
+                          required
+                          minLength={2}
+                          value={userForm.username}
+                          onChange={(e) => setUserForm((p) => ({ ...p, username: e.target.value }))}
+                          className="px-3 py-2.5 text-sm rounded-xl border border-[#1E3444] bg-[#0B151C] text-[#EEF6FA] focus:outline-none focus:border-sky-500 placeholder:text-[#374F5E]"
+                          placeholder="ex: ahmed"
+                        />
+                      </div>
+                      {/* Email */}
+                      <div className="flex flex-col gap-1.5">
+                        <label className="text-xs font-semibold text-[#7A98A8] uppercase tracking-wide">Email</label>
+                        <input
+                          type="email"
+                          value={userForm.email}
+                          onChange={(e) => setUserForm((p) => ({ ...p, email: e.target.value }))}
+                          className="px-3 py-2.5 text-sm rounded-xl border border-[#1E3444] bg-[#0B151C] text-[#EEF6FA] focus:outline-none focus:border-sky-500 placeholder:text-[#374F5E]"
+                          placeholder="ex: ahmed@domaine.ma"
+                        />
+                      </div>
+                      {/* Password */}
+                      <div className="flex flex-col gap-1.5">
+                        <label className="text-xs font-semibold text-[#7A98A8] uppercase tracking-wide">
+                          Mot de passe {editingUser ? '(laisser vide = inchangé)' : '*'}
+                        </label>
+                        <input
+                          type="password"
+                          required={!editingUser}
+                          minLength={editingUser ? 0 : 6}
+                          value={userForm.password}
+                          onChange={(e) => setUserForm((p) => ({ ...p, password: e.target.value }))}
+                          className="px-3 py-2.5 text-sm rounded-xl border border-[#1E3444] bg-[#0B151C] text-[#EEF6FA] focus:outline-none focus:border-sky-500 placeholder:text-[#374F5E]"
+                          placeholder="Min 6 caractères"
+                        />
+                      </div>
+                      {/* Role */}
+                      <div className="flex flex-col gap-1.5">
+                        <label className="text-xs font-semibold text-[#7A98A8] uppercase tracking-wide">Rôle</label>
+                        <select
+                          value={userForm.role}
+                          onChange={(e) => setUserForm((p) => ({ ...p, role: e.target.value }))}
+                          className="px-3 py-2.5 text-sm rounded-xl border border-[#1E3444] bg-[#0B151C] text-[#EEF6FA] focus:outline-none focus:border-sky-500"
+                        >
+                          <option value="admin">Admin — accès complet</option>
+                          <option value="editor">Éditeur — produits & contenu</option>
+                          <option value="viewer">Lecteur — consultation seule</option>
+                        </select>
+                      </div>
+                      {/* Buttons */}
+                      <div className="sm:col-span-2 flex gap-3 justify-end pt-2">
+                        <button
+                          type="button"
+                          onClick={() => setShowUserForm(false)}
+                          className="px-4 py-2 rounded-xl border border-[#1E3444] bg-[#12222B] text-[#7A98A8] text-sm font-semibold hover:text-[#EEF6FA] transition-colors"
+                        >
+                          Annuler
+                        </button>
+                        <button
+                          type="submit"
+                          disabled={savingUser}
+                          className="px-5 py-2 rounded-xl bg-gradient-to-r from-[#0284C7] to-[#0369A1] text-white text-sm font-semibold disabled:opacity-60 hover:from-[#0369A1] hover:to-[#025A87] transition-all shadow-md shadow-sky-500/20"
+                        >
+                          {savingUser ? 'Enregistrement...' : editingUser ? 'Mettre à jour' : 'Créer'}
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                )}
+
+                {/* Users Table */}
+                <div className="rounded-2xl border border-[#1E3444] bg-[#0D1E2A] overflow-hidden">
+                  {usersLoading ? (
+                    <div className="py-16 text-center text-sm text-[#7A98A8]">Chargement...</div>
+                  ) : adminUsers.length === 0 ? (
+                    <div className="py-16 text-center">
+                      <Users className="w-10 h-10 text-[#2A4256] mx-auto mb-3" />
+                      <p className="text-sm font-semibold text-[#EEF6FA]">Aucun utilisateur</p>
+                      <p className="text-xs text-[#7A98A8] mt-1">La table <code className="text-sky-400">admin_auth</code> est vide ou n'existe pas encore.</p>
+                      <p className="text-xs text-[#4A6878] mt-2">Créez d'abord la table via l'onglet Supabase SQL.</p>
+                    </div>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm">
+                        <thead>
+                          <tr className="border-b border-[#182B37]">
+                            <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-widest text-[#4A6878]">Utilisateur</th>
+                            <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-widest text-[#4A6878]">Email</th>
+                            <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-widest text-[#4A6878]">Rôle</th>
+                            <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-widest text-[#4A6878]">Créé le</th>
+                            <th className="px-4 py-3 text-right text-[10px] font-bold uppercase tracking-widest text-[#4A6878]">Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-[#182B37]">
+                          {adminUsers.map((u) => (
+                            <tr key={u.id} className="hover:bg-[#12222B]/60 transition-colors">
+                              <td className="px-4 py-3">
+                                <div className="flex items-center gap-2.5">
+                                  <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#0284C7]/30 to-[#38BDF8]/20 border border-[#1E3444] flex items-center justify-center shrink-0">
+                                    <User className="w-4 h-4 text-[#38BDF8]" />
+                                  </div>
+                                  <span className="font-semibold text-[#EEF6FA]">{u.username}</span>
+                                </div>
+                              </td>
+                              <td className="px-4 py-3 text-[#7A98A8]">{u.email || <span className="text-[#2A4256] italic">—</span>}</td>
+                              <td className="px-4 py-3">
+                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${
+                                  u.role === 'admin'
+                                    ? 'bg-sky-500/15 border-sky-500/30 text-sky-300'
+                                    : u.role === 'editor'
+                                      ? 'bg-violet-500/15 border-violet-500/30 text-violet-300'
+                                      : 'bg-[#1A2E3B] border-[#1E3444] text-[#7A98A8]'
+                                }`}>
+                                  {u.role === 'admin' ? 'Admin' : u.role === 'editor' ? 'Éditeur' : 'Lecteur'}
+                                </span>
+                              </td>
+                              <td className="px-4 py-3 text-xs text-[#4A6878] tabular-nums">
+                                {new Date(u.created_at).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })}
+                              </td>
+                              <td className="px-4 py-3">
+                                <div className="flex items-center gap-2 justify-end">
+                                  <button
+                                    type="button"
+                                    onClick={() => openEditUser(u)}
+                                    className="w-8 h-8 rounded-lg flex items-center justify-center text-[#7A98A8] hover:text-sky-400 hover:bg-sky-500/10 transition-colors"
+                                    title="Modifier"
+                                  >
+                                    <Edit3 className="w-3.5 h-3.5" />
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleDeleteUser(u.id)}
+                                    disabled={deletingUserId === u.id}
+                                    className="w-8 h-8 rounded-lg flex items-center justify-center text-[#7A98A8] hover:text-red-400 hover:bg-red-500/10 disabled:opacity-40 transition-colors"
+                                    title="Supprimer"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+
+                {/* SQL hint */}
+                <div className="rounded-xl border border-[#1E3444]/60 bg-[#0B151C]/60 p-4 text-xs text-[#4A6878]">
+                  <p className="font-semibold text-[#7A98A8] mb-1">💡 Structure SQL requise</p>
+                  <pre className="font-mono text-[11px] text-[#38BDF8]/70 whitespace-pre-wrap leading-relaxed">{`CREATE TABLE IF NOT EXISTS admin_auth (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  username TEXT NOT NULL UNIQUE,
+  email TEXT,
+  password_hash TEXT NOT NULL,
+  salt TEXT NOT NULL,
+  role TEXT NOT NULL DEFAULT 'viewer',
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);`}</pre>
+                </div>
+              </div>
+            )}
           </main>
         </div>
       </div>

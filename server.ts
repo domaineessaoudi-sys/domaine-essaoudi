@@ -705,6 +705,109 @@ app.patch('/api/admin/messages/:id', requireAdmin, async (req, res) => {
   }
 });
 
+// ─────────────────────────────────────────────────────────────
+// Admin Users CRUD — table: admin_auth
+// ─────────────────────────────────────────────────────────────
+
+// List all users from admin_auth table
+app.get('/api/admin/users', requireAdmin, async (_req, res) => {
+  try {
+    const result = await executeSqlQuery({
+      target: 'supabase',
+      sql: "SELECT id, username, email, role, created_at, updated_at FROM admin_auth ORDER BY created_at DESC;",
+    });
+    res.json({ users: result.rows || [] });
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : 'Erreur chargement utilisateurs.' });
+  }
+});
+
+// Create user
+app.post('/api/admin/users', requireAdmin, async (req, res) => {
+  try {
+    const { username, email, password, role } = req.body || {};
+    if (!username || typeof username !== 'string' || username.trim().length < 2) {
+      res.status(400).json({ error: 'Nom d\'utilisateur requis (min 2 caractères).' });
+      return;
+    }
+    if (!password || typeof password !== 'string' || password.length < 6) {
+      res.status(400).json({ error: 'Mot de passe requis (min 6 caractères).' });
+      return;
+    }
+    const allowedRoles = ['admin', 'editor', 'viewer'];
+    const safeRole = allowedRoles.includes(role) ? role : 'viewer';
+    const salt = crypto.randomBytes(16).toString('hex');
+    const passwordHash = crypto.createHmac('sha256', salt).update(password).digest('hex');
+    const safeUsername = username.trim().replace(/'/g, "''");
+    const safeEmail = (email || '').trim().replace(/'/g, "''");
+    const result = await executeSqlQuery({
+      target: 'supabase',
+      sql: `INSERT INTO admin_auth (username, email, password_hash, salt, role, created_at, updated_at)
+            VALUES ('${safeUsername}', '${safeEmail}', '${passwordHash}', '${salt}', '${safeRole}', NOW(), NOW())
+            RETURNING id, username, email, role, created_at, updated_at;`,
+    });
+    res.json({ user: result.rows?.[0] || null });
+  } catch (err) {
+    res.status(400).json({ error: err instanceof Error ? err.message : 'Erreur création utilisateur.' });
+  }
+});
+
+// Update user
+app.patch('/api/admin/users/:id', requireAdmin, async (req, res) => {
+  try {
+    const id = req.params.id;
+    const { username, email, password, role } = req.body || {};
+    const allowedRoles = ['admin', 'editor', 'viewer'];
+    const setParts: string[] = [];
+    if (username && typeof username === 'string' && username.trim().length >= 2) {
+      setParts.push(`username = '${username.trim().replace(/'/g, "''")}'`);
+    }
+    if (email !== undefined) {
+      setParts.push(`email = '${String(email).trim().replace(/'/g, "''")}'`);
+    }
+    if (role && allowedRoles.includes(role)) {
+      setParts.push(`role = '${role}'`);
+    }
+    if (password && typeof password === 'string' && password.length >= 6) {
+      const salt = crypto.randomBytes(16).toString('hex');
+      const passwordHash = crypto.createHmac('sha256', salt).update(password).digest('hex');
+      setParts.push(`password_hash = '${passwordHash}', salt = '${salt}'`);
+    }
+    if (setParts.length === 0) {
+      res.status(400).json({ error: 'Aucun champ valide à mettre à jour.' });
+      return;
+    }
+    setParts.push(`updated_at = NOW()`);
+    const safeId = String(id).replace(/[^a-zA-Z0-9_-]/g, '');
+    const result = await executeSqlQuery({
+      target: 'supabase',
+      sql: `UPDATE admin_auth SET ${setParts.join(', ')} WHERE id = '${safeId}'
+            RETURNING id, username, email, role, created_at, updated_at;`,
+    });
+    if (!result.rows?.length) {
+      res.status(404).json({ error: 'Utilisateur introuvable.' });
+      return;
+    }
+    res.json({ user: result.rows[0] });
+  } catch (err) {
+    res.status(400).json({ error: err instanceof Error ? err.message : 'Erreur mise à jour utilisateur.' });
+  }
+});
+
+// Delete user
+app.delete('/api/admin/users/:id', requireAdmin, async (req, res) => {
+  try {
+    const safeId = String(req.params.id).replace(/[^a-zA-Z0-9_-]/g, '');
+    await executeSqlQuery({
+      target: 'supabase',
+      sql: `DELETE FROM admin_auth WHERE id = '${safeId}';`,
+    });
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(400).json({ error: err instanceof Error ? err.message : 'Erreur suppression utilisateur.' });
+  }
+});
+
 // Protected Supabase & SQL Editor Routes
 app.get('/api/admin/supabase/config', requireAdmin, (_req, res) => {
   res.json({ supabase: getPublicSupabaseStatus() });
