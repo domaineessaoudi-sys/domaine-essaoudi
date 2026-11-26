@@ -2745,34 +2745,59 @@ app.patch("/api/admin/messages/:id", requireAdmin, async (req, res) => {
     });
   }
 });
-async function ensureAdminAuthColumns() {
-  const alterSql = `
-    ALTER TABLE admin_auth
-      ADD COLUMN IF NOT EXISTS username TEXT,
-      ADD COLUMN IF NOT EXISTS email TEXT,
-      ADD COLUMN IF NOT EXISTS role TEXT NOT NULL DEFAULT 'admin',
-      ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT NOW();
-  `;
-  try {
-    await executeSqlQuery({ target: "supabase", sql: alterSql });
-  } catch {
+async function supabaseAuthRest(pathWithQuery, options = {}) {
+  const cfg = getStoredSupabaseConfig();
+  if (!cfg.projectUrl || !cfg.serviceRoleKey) {
+    throw new Error("Supabase Project URL ou Service Role Key manquante.");
   }
+  const headers = {
+    apikey: cfg.serviceRoleKey,
+    Authorization: `Bearer ${cfg.serviceRoleKey}`
+  };
+  if (options.body !== void 0) {
+    headers["Content-Type"] = "application/json";
+  }
+  if (options.prefer) {
+    headers.Prefer = options.prefer;
+  }
+  const res = await fetch(`${cfg.projectUrl}/rest/v1/${pathWithQuery}`, {
+    method: options.method || "GET",
+    headers,
+    body: options.body !== void 0 ? JSON.stringify(options.body) : void 0
+  });
+  const text = await res.text().catch(() => "");
+  let data = null;
+  if (text) {
+    try {
+      data = JSON.parse(text);
+    } catch {
+      data = text;
+    }
+  }
+  if (!res.ok) {
+    const msg = typeof data === "object" && data?.message ? data.message : text || `HTTP ${res.status}`;
+    throw new Error(msg);
+  }
+  return data;
 }
 app.get("/api/admin/users", requireAdmin, async (_req, res) => {
   try {
-    await ensureAdminAuthColumns();
-    const result = await executeSqlQuery({
-      target: "supabase",
-      sql: "SELECT id, COALESCE(username, 'admin') as username, COALESCE(email, '') as email, COALESCE(role, 'admin') as role, COALESCE(created_at, updated_at) as created_at, updated_at FROM admin_auth ORDER BY id DESC;"
-    });
-    res.json({ users: result.rows || [] });
+    const rows = await supabaseAuthRest("admin_auth?select=id,username,email,role,created_at,updated_at&order=id.desc");
+    const users = (Array.isArray(rows) ? rows : []).map((u) => ({
+      id: String(u.id),
+      username: u.username || "admin",
+      email: u.email || "",
+      role: u.role || "admin",
+      created_at: u.created_at || u.updated_at || (/* @__PURE__ */ new Date()).toISOString(),
+      updated_at: u.updated_at || (/* @__PURE__ */ new Date()).toISOString()
+    }));
+    res.json({ users });
   } catch (err) {
     res.status(500).json({ error: err instanceof Error ? err.message : "Erreur chargement utilisateurs." });
   }
 });
 app.post("/api/admin/users", requireAdmin, async (req, res) => {
   try {
-    await ensureAdminAuthColumns();
     const { username, email, password, role } = req.body || {};
     if (!username || typeof username !== "string" || username.trim().length < 2) {
       res.status(400).json({ error: "Nom d'utilisateur requis (min 2 caract\xE8res)." });
@@ -2786,15 +2811,22 @@ app.post("/api/admin/users", requireAdmin, async (req, res) => {
     const safeRole = allowedRoles.includes(role) ? role : "viewer";
     const salt = crypto3.randomBytes(16).toString("hex");
     const passwordHash = crypto3.createHmac("sha256", salt).update(password).digest("hex");
-    const safeUsername = username.trim().replace(/'/g, "''");
-    const safeEmail = (email || "").trim().replace(/'/g, "''");
-    const result = await executeSqlQuery({
-      target: "supabase",
-      sql: `INSERT INTO admin_auth (username, email, password_hash, salt, role, created_at, updated_at)
-            VALUES ('${safeUsername}', '${safeEmail}', '${passwordHash}', '${salt}', '${safeRole}', NOW(), NOW())
-            RETURNING id, COALESCE(username,'admin') as username, COALESCE(email,'') as email, COALESCE(role,'admin') as role, created_at, updated_at;`
+    const now = (/* @__PURE__ */ new Date()).toISOString();
+    const inserted = await supabaseAuthRest("admin_auth", {
+      method: "POST",
+      prefer: "return=representation",
+      body: {
+        username: username.trim(),
+        email: (email || "").trim(),
+        password_hash: passwordHash,
+        salt,
+        role: safeRole,
+        created_at: now,
+        updated_at: now
+      }
     });
-    res.json({ user: result.rows?.[0] || null });
+    const user = Array.isArray(inserted) ? inserted[0] : inserted;
+    res.json({ user });
   } catch (err) {
     res.status(400).json({ error: err instanceof Error ? err.message : "Erreur cr\xE9ation utilisateur." });
   }
@@ -2804,55 +2836,39 @@ app.patch("/api/admin/users/:id", requireAdmin, async (req, res) => {
     const id = req.params.id;
     const { username, email, password, role } = req.body || {};
     const allowedRoles = ["admin", "editor", "viewer"];
-    const setParts = [];
+    const patchBody = {
+      updated_at: (/* @__PURE__ */ new Date()).toISOString()
+    };
     if (username && typeof username === "string" && username.trim().length >= 2) {
-      setParts.push(`username = '${username.trim().replace(/'/g, "''")}'`);
+      patchBody.username = username.trim();
     }
     if (email !== void 0) {
-      setParts.push(`email = '${String(email).trim().replace(/'/g, "''")}'`);
+      patchBody.email = String(email).trim();
     }
     if (role && allowedRoles.includes(role)) {
-      setParts.push(`role = '${role}'`);
+      patchBody.role = role;
     }
     if (password && typeof password === "string" && password.length >= 6) {
       const salt = crypto3.randomBytes(16).toString("hex");
-      const passwordHash = crypto3.createHmac("sha256", salt).update(password).digest("hex");
-      setParts.push(`password_hash = '${passwordHash}', salt = '${salt}'`);
+      patchBody.salt = salt;
+      patchBody.password_hash = crypto3.createHmac("sha256", salt).update(password).digest("hex");
     }
-    if (setParts.length === 0) {
-      res.status(400).json({ error: "Aucun champ valide \xE0 mettre \xE0 jour." });
-      return;
-    }
-    setParts.push(`updated_at = NOW()`);
-    const numericId = parseInt(String(id), 10);
-    if (isNaN(numericId)) {
-      res.status(400).json({ error: "ID invalide." });
-      return;
-    }
-    const result = await executeSqlQuery({
-      target: "supabase",
-      sql: `UPDATE admin_auth SET ${setParts.join(", ")} WHERE id = ${numericId}
-            RETURNING id, COALESCE(username,'admin') as username, COALESCE(email,'') as email, COALESCE(role,'admin') as role, COALESCE(created_at, updated_at) as created_at, updated_at;`
+    const updated = await supabaseAuthRest(`admin_auth?id=eq.${encodeURIComponent(id)}`, {
+      method: "PATCH",
+      prefer: "return=representation",
+      body: patchBody
     });
-    if (!result.rows?.length) {
-      res.status(404).json({ error: "Utilisateur introuvable." });
-      return;
-    }
-    res.json({ user: result.rows[0] });
+    const user = Array.isArray(updated) ? updated[0] : updated;
+    res.json({ user });
   } catch (err) {
     res.status(400).json({ error: err instanceof Error ? err.message : "Erreur mise \xE0 jour utilisateur." });
   }
 });
 app.delete("/api/admin/users/:id", requireAdmin, async (req, res) => {
   try {
-    const numericId = parseInt(String(req.params.id), 10);
-    if (isNaN(numericId)) {
-      res.status(400).json({ error: "ID invalide." });
-      return;
-    }
-    await executeSqlQuery({
-      target: "supabase",
-      sql: `DELETE FROM admin_auth WHERE id = ${numericId};`
+    const id = req.params.id;
+    await supabaseAuthRest(`admin_auth?id=eq.${encodeURIComponent(id)}`, {
+      method: "DELETE"
     });
     res.json({ ok: true });
   } catch (err) {
