@@ -780,10 +780,10 @@ export function AdminPage() {
   }
 
   return (
-    <div className="admin-theme dark min-h-screen p-2 sm:p-5 lg:p-7 flex justify-center items-start bg-[#070E13]">
+    <div className="admin-theme dark h-screen p-2 sm:p-5 lg:p-7 flex justify-center items-start bg-[#070E13] overflow-hidden">
       {/* Main Dashboard Canvas Shell (Floating Card from design) */}
-      <div className="w-full bg-[#0D171F] rounded-[32px] sm:rounded-[36px] border border-[#1E3444] shadow-[0_25px_60px_rgba(0,0,0,0.65)] flex flex-col">
-        {/* Top Header Bar inside Shell — overflow:visible so the notif dropdown can escape */}
+      <div className="w-full h-full bg-[#0D171F] rounded-[32px] sm:rounded-[36px] border border-[#1E3444] shadow-[0_25px_60px_rgba(0,0,0,0.65)] flex flex-col overflow-hidden">
+        {/* Top Header Bar inside Shell */}
         <header className="h-20 border-b border-[#182B37] px-4 sm:px-8 flex items-center justify-between gap-4 bg-[#0D171F]/90 backdrop-blur-md shrink-0 rounded-t-[32px] sm:rounded-t-[36px] relative z-40">
           {/* Left Brand + Active Section */}
           <div className="flex items-center gap-3 sm:gap-4 min-w-0">
@@ -997,10 +997,10 @@ export function AdminPage() {
           </div>
         </header>
 
-        {/* Body Section: Left Sticky Pill Sidebar + Main Content Area */}
-        <div className="flex flex-col md:flex-row flex-1 p-4 sm:p-6 lg:p-8 gap-6 lg:gap-8 items-start relative">
-          {/* Left Vertical Pill Sidebar (Fixed / Sticky Pill Capsule) */}
-          <aside className="sticky top-6 self-start w-full md:w-20 bg-[#12222B] rounded-2xl md:rounded-[40px] border border-[#1E3444] p-2 sm:p-3 md:py-6 flex flex-row md:flex-col items-center justify-between md:justify-start gap-2 md:gap-6 shrink-0 shadow-lg z-30">
+        {/* Body Section: Left Pill Sidebar (full-height) + Scrollable Main Content */}
+        <div className="flex flex-col md:flex-row flex-1 overflow-hidden gap-0">
+          {/* Left Vertical Pill Sidebar */}
+          <aside className="w-full md:w-28 md:h-full bg-[#12222B] md:rounded-none md:rounded-bl-[32px] border-b md:border-b-0 md:border-r border-[#1E3444] p-2 sm:p-3 md:py-8 md:px-4 flex flex-row md:flex-col items-center justify-between md:justify-start gap-2 md:gap-6 shrink-0 shadow-lg z-30">
             {(
               [
                 { key: 'overview', label: 'Dashboard', icon: LayoutDashboard },
@@ -1036,15 +1036,15 @@ export function AdminPage() {
             </div>
           </aside>
 
-          {/* Right Main Working Area */}
-          <main className="flex-1 w-full min-w-0 space-y-6">
+          {/* Right Main Working Area — only this scrolls */}
+          <main className="flex-1 w-full min-w-0 overflow-y-auto p-4 sm:p-6 lg:p-8 space-y-6">
             {adminDbError && activeTab !== 'sql' && (
-              <div className="rounded-2xl border border-red-200 bg-[#FEE2E2] px-4 py-3 flex flex-wrap items-center justify-between gap-3 text-xs text-[#991B1B]">
+              <div className="rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3 flex flex-wrap items-center justify-between gap-3 text-xs text-red-300">
                 <span>{adminDbError}</span>
                 <button
                   type="button"
                   onClick={() => setActiveTab('sql')}
-                  className="px-3 py-1.5 rounded-xl bg-[#9E2A2B] text-white font-semibold hover:bg-[#7F1D1D] transition-colors shrink-0"
+                  className="px-3 py-1.5 rounded-xl bg-red-700 text-white font-semibold hover:bg-red-800 transition-colors shrink-0"
                 >
                   Ouvrir SQL Editor &amp; Supabase
                 </button>
@@ -1052,7 +1052,7 @@ export function AdminPage() {
             )}
 
             {emailStatus && !emailStatus.configured && activeTab !== 'content' && (
-              <div className="rounded-2xl border border-amber-300 bg-amber-50 px-4 py-3 flex flex-wrap items-center justify-between gap-3 text-xs text-amber-950">
+              <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 flex flex-wrap items-center justify-between gap-3 text-xs text-amber-300">
                 <span>
                   Configurez vos 3 identifiants EmailJS pour recevoir automatiquement chaque commande sur{' '}
                   <strong dir="ltr">{emailStatus.recipientEmail}</strong>.
