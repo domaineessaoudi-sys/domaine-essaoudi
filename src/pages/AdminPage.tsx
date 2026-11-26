@@ -177,21 +177,7 @@ export function AdminPage() {
   const [orderYearFilter, setOrderYearFilter] = useState<string>('all');
   const [orderPage, setOrderPage] = useState<number>(1);
   const ordersPerPage = 10;
-
-  const [darkMode, setDarkMode] = useState<boolean>(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('domaine_admin_dark') === 'true';
-    }
-    return false;
-  });
-
-  const toggleDarkMode = () => {
-    setDarkMode((prev) => {
-      const next = !prev;
-      localStorage.setItem('domaine_admin_dark', String(next));
-      return next;
-    });
-  };
+  const darkMode = true;
 
   const [showProductForm, setShowProductForm] = useState(false);
   const [productForm, setProductForm] = useState<ProductFormState>(EMPTY_PRODUCT_FORM);
@@ -340,7 +326,7 @@ export function AdminPage() {
       await fetch('/api/admin/logout', {
         method: 'POST',
         headers: { Authorization: `Bearer ${adminToken}` },
-      }).catch(() => {});
+      }).catch(() => { });
     }
     setAdminToken(null);
   };
@@ -650,28 +636,28 @@ export function AdminPage() {
 
   if (authChecking) {
     return (
-      <div className={`admin-theme ${darkMode ? 'dark' : ''} min-h-screen flex items-center justify-center`}>
-        <div className="text-sm font-medium text-[#516358]">{t.common.loading}</div>
+      <div className="admin-theme dark min-h-screen flex items-center justify-center bg-[#070E13]">
+        <div className="text-sm font-medium text-[#7A98A8]">{t.common.loading}</div>
       </div>
     );
   }
 
   if (!adminToken) {
     return (
-      <div className={`admin-theme ${darkMode ? 'dark' : ''} min-h-screen flex flex-col`}>
+      <div className="admin-theme dark min-h-screen flex flex-col bg-[#070E13] text-[#EEF6FA]">
         {/* Backoffice Clean Header Bar */}
-        <header className="border-b border-[#DCE8DF] bg-white transition-colors">
+        <header className="border-b border-[#1E3444] bg-[#0D171F]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#1E5C36] to-[#0E3B22] text-white flex items-center justify-center font-bold text-sm shadow-xs">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#0284C7] to-[#0369A1] text-white flex items-center justify-center font-bold text-sm shadow-md">
                 DE
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="font-display font-bold text-sm sm:text-base text-[#0F2418]">
+                  <span className="font-display font-bold text-sm sm:text-base text-[#EEF6FA]">
                     Domaine Essaoudi
                   </span>
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-emerald-500/10 text-emerald-700 border border-emerald-500/20">
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-sky-500/10 text-sky-400 border border-sky-500/20">
                     Backoffice
                   </span>
                 </div>
@@ -682,44 +668,34 @@ export function AdminPage() {
               <button
                 type="button"
                 onClick={() => navigate('/')}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border border-[#DCE8DF] bg-white text-[#0F2418] hover:bg-[#F2F7F4] transition-colors"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border border-[#1E3444] bg-[#12222B] text-[#EEF6FA] hover:bg-[#162833] transition-colors"
                 title="Retourner au site public"
               >
-                <Globe className="w-4 h-4 text-[#2E7D47]" />
+                <Globe className="w-4 h-4 text-[#38BDF8]" />
                 <span>Voir web site</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={toggleDarkMode}
-                className="p-2 rounded-xl text-xs font-semibold border border-[#DCE8DF] bg-white text-[#0F2418] hover:bg-[#F2F7F4] transition-colors"
-                title={darkMode ? 'Mode clair' : 'Mode sombre'}
-                aria-label="Basculer le thème"
-              >
-                {darkMode ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-600" />}
               </button>
             </div>
           </div>
         </header>
 
         <div className="flex-1 flex items-center justify-center p-4 py-16 sm:py-24">
-          <div className="max-w-md w-full bg-white rounded-2xl border border-[#DCE8DF] p-6 sm:p-8 space-y-6 shadow-sm">
+          <div className="max-w-md w-full bg-[#12222B] rounded-2xl border border-[#1E3444] p-6 sm:p-8 space-y-6 shadow-xl">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-[#0E3B22]/10 text-[#0E3B22] flex items-center justify-center shrink-0">
+              <div className="w-10 h-10 rounded-lg bg-sky-500/10 text-sky-400 flex items-center justify-center shrink-0">
                 <Lock className="w-5 h-5" aria-hidden="true" />
               </div>
               <div>
-                <h1 className="font-display text-xl font-semibold text-[#0F2418]">
+                <h1 className="font-display text-xl font-semibold text-[#EEF6FA]">
                   {configured ? t.admin.loginTitle : t.admin.claimTitle}
                 </h1>
-                <p className="text-xs text-[#516358] mt-0.5">
+                <p className="text-xs text-[#7A98A8] mt-0.5">
                   {configured ? t.admin.loginSubtitle : t.admin.claimSubtitle}
                 </p>
               </div>
             </div>
 
             {authError && (
-              <div className="p-3 rounded-lg bg-[#FEE2E2] text-[#991B1B] text-xs font-medium">
+              <div className="p-3 rounded-lg bg-red-950/60 border border-red-800 text-red-200 text-xs font-medium">
                 {authError}
               </div>
             )}
@@ -728,7 +704,7 @@ export function AdminPage() {
               <div>
                 <label
                   htmlFor="admin-password"
-                  className="block text-xs font-semibold text-[#4A5D52] mb-1.5"
+                  className="block text-xs font-semibold text-[#8AA4B4] mb-1.5"
                 >
                   {t.admin.passwordLabel}
                 </label>
@@ -738,7 +714,7 @@ export function AdminPage() {
                   autoComplete={configured ? 'current-password' : 'new-password'}
                   value={passwordInput}
                   onChange={(e) => setPasswordInput(e.target.value)}
-                  className="w-full px-3.5 py-2.5 text-sm rounded-lg border border-[#DCE8DF] bg-[#F7FAF7]"
+                  className="w-full px-3.5 py-2.5 text-sm rounded-lg border border-[#1E3444] bg-[#0B151C] text-white focus:outline-none focus:border-sky-500"
                   placeholder={configured ? '••••••••' : 'Minimum 6 characters'}
                 />
               </div>
@@ -746,7 +722,7 @@ export function AdminPage() {
               <button
                 type="submit"
                 disabled={authSubmitting}
-                className="w-full py-3 px-4 rounded-lg bg-[#0E3B22] hover:bg-[#082716] disabled:opacity-60 text-white text-sm font-semibold transition-colors"
+                className="w-full py-3 px-4 rounded-lg bg-[#0284C7] hover:bg-[#0369A1] disabled:opacity-60 text-white text-sm font-semibold transition-colors shadow-md shadow-sky-600/30"
               >
                 {authSubmitting
                   ? t.common.loading
@@ -762,27 +738,27 @@ export function AdminPage() {
   }
 
   return (
-    <div className={`admin-theme ${darkMode ? 'dark' : ''} min-h-screen p-2 sm:p-5 lg:p-7 flex justify-center items-start`}>
+    <div className="admin-theme dark min-h-screen p-2 sm:p-5 lg:p-7 flex justify-center items-start bg-[#070E13]">
       {/* Main Dashboard Canvas Shell (Floating Card from design) */}
-      <div className="w-full max-w-[1440px] bg-white dark:bg-[#0D171F] rounded-[32px] sm:rounded-[36px] border border-[#D5E6EE] dark:border-[#182C38] shadow-[0_20px_60px_-15px_rgba(23,84,116,0.14)] dark:shadow-[0_25px_60px_rgba(0,0,0,0.65)] overflow-hidden flex flex-col">
+      <div className="w-full bg-[#0D171F] rounded-[32px] sm:rounded-[36px] border border-[#1E3444] shadow-[0_25px_60px_rgba(0,0,0,0.65)] overflow-hidden flex flex-col">
         {/* Top Header Bar inside Shell */}
-        <header className="h-20 border-b border-[#EDF4F8] dark:border-[#182B37] px-4 sm:px-8 flex items-center justify-between gap-4 bg-white/70 dark:bg-[#0D171F]/80 backdrop-blur-md shrink-0">
+        <header className="h-20 border-b border-[#182B37] px-4 sm:px-8 flex items-center justify-between gap-4 bg-[#0D171F]/90 backdrop-blur-md shrink-0">
           {/* Left Brand + Active Section */}
           <div className="flex items-center gap-3 sm:gap-4 min-w-0">
             <div className="flex items-center gap-2.5">
               <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#0284C7] to-[#0369A1] text-white flex items-center justify-center font-bold text-sm shadow-md shadow-sky-500/20 shrink-0">
                 DE
               </div>
-              <span className="font-display font-extrabold text-base sm:text-lg tracking-tight text-[#0B4A6F] dark:text-[#67D4F8] truncate">
+              <span className="font-display font-extrabold text-base sm:text-lg tracking-tight text-[#67D4F8] truncate">
                 domaine essaoudi
               </span>
             </div>
 
-            <span className="text-[#CFE0EB] dark:text-[#253E50] text-xl font-light hidden sm:inline">
+            <span className="text-[#253E50] text-xl font-light hidden sm:inline">
               |
             </span>
 
-            <span className="font-display font-bold text-xs sm:text-sm tracking-wider text-[#1C3647] dark:text-[#E2EFF7] uppercase truncate hidden sm:inline">
+            <span className="font-display font-bold text-xs sm:text-sm tracking-wider text-[#E2EFF7] uppercase truncate hidden sm:inline">
               {activeTab === 'overview'
                 ? 'DASHBOARD'
                 : activeTab === 'products'
@@ -795,14 +771,14 @@ export function AdminPage() {
             </span>
           </div>
 
-          {/* Right Area: Alerts, Mode Dark, User greeting, CTA "VOIR WEB SITE" */}
+          {/* Right Area: Alerts, User greeting, CTA "VOIR WEB SITE", Logout */}
           <div className="flex items-center gap-2 sm:gap-4 shrink-0">
             {/* Notification Bell */}
             <div className="relative">
               <button
                 type="button"
                 onClick={() => setActiveTab('content')}
-                className="w-10 h-10 rounded-full flex items-center justify-center text-[#7A98A8] dark:text-[#6C8A9B] hover:text-[#0284C7] hover:bg-[#F2F8FC] dark:hover:bg-[#152530] transition-colors relative"
+                className="w-10 h-10 rounded-full flex items-center justify-center text-[#7A98A8] hover:text-[#38BDF8] hover:bg-[#152530] transition-colors relative"
                 title="Messages et alertes"
                 aria-label="Alertes"
               >
@@ -813,27 +789,16 @@ export function AdminPage() {
               </button>
             </div>
 
-            {/* Dark Mode toggle */}
-            <button
-              type="button"
-              onClick={toggleDarkMode}
-              className="w-10 h-10 rounded-full flex items-center justify-center text-[#7A98A8] dark:text-[#6C8A9B] hover:text-[#0284C7] hover:bg-[#F2F8FC] dark:hover:bg-[#152530] transition-colors"
-              title={darkMode ? 'Passer en mode clair' : 'Passer en mode sombre'}
-              aria-label="Basculer le thème"
-            >
-              {darkMode ? <Sun className="w-5 h-5 text-amber-400" /> : <Moon className="w-5 h-5 text-slate-600" />}
-            </button>
-
             {/* User Greeting & Avatar */}
             <div className="flex items-center gap-2.5 ps-1 sm:ps-2">
-              <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-[#0284C7] to-[#38BDF8] text-white flex items-center justify-center font-bold text-xs ring-2 ring-white dark:ring-[#1E3444] shadow-xs shrink-0">
+              <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-[#0284C7] to-[#38BDF8] text-white flex items-center justify-center font-bold text-xs ring-2 ring-[#1E3444] shadow-xs shrink-0">
                 SA
               </div>
               <div className="text-start hidden lg:block">
-                <div className="text-[10px] text-[#7A98A8] dark:text-[#6C8A9B] leading-none">
+                <div className="text-[10px] text-[#7A98A8] leading-none">
                   Bonjour,
                 </div>
-                <div className="text-xs font-bold text-[#1C3647] dark:text-[#E2EFF7] leading-tight mt-0.5">
+                <div className="text-xs font-bold text-[#E2EFF7] leading-tight mt-0.5">
                   Admin Said
                 </div>
               </div>
@@ -855,7 +820,7 @@ export function AdminPage() {
             <button
               type="button"
               onClick={handleLogout}
-              className="w-9 h-9 rounded-full flex items-center justify-center text-red-500/80 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
+              className="w-9 h-9 rounded-full flex items-center justify-center text-red-400 hover:text-red-300 hover:bg-red-950/40 transition-colors"
               title={t.admin.logoutBtn}
               aria-label="Déconnexion"
             >
@@ -864,10 +829,10 @@ export function AdminPage() {
           </div>
         </header>
 
-        {/* Body Section: Left Pill Sidebar + Main Content Area */}
-        <div className="flex flex-col md:flex-row flex-1 p-4 sm:p-6 lg:p-8 gap-6 lg:gap-8 items-start">
-          {/* Left Vertical Pill Sidebar (Exact pill capsule design from screenshot) */}
-          <aside className="w-full md:w-20 md:self-stretch bg-[#F4F9FC] dark:bg-[#12222B] rounded-2xl md:rounded-[40px] border border-[#E1EDF3] dark:border-[#1E3444] p-2 sm:p-3 md:py-6 flex flex-row md:flex-col items-center justify-between md:justify-start gap-2 md:gap-6 shrink-0 shadow-xs">
+        {/* Body Section: Left Sticky Pill Sidebar + Main Content Area */}
+        <div className="flex flex-col md:flex-row flex-1 p-4 sm:p-6 lg:p-8 gap-6 lg:gap-8 items-start relative">
+          {/* Left Vertical Pill Sidebar (Fixed / Sticky Pill Capsule) */}
+          <aside className="sticky top-6 self-start w-full md:w-20 bg-[#12222B] rounded-2xl md:rounded-[40px] border border-[#1E3444] p-2 sm:p-3 md:py-6 flex flex-row md:flex-col items-center justify-between md:justify-start gap-2 md:gap-6 shrink-0 shadow-lg z-30">
             {(
               [
                 { key: 'overview', label: 'Dashboard', icon: LayoutDashboard },
@@ -884,11 +849,10 @@ export function AdminPage() {
                   key={item.key}
                   type="button"
                   onClick={() => setActiveTab(item.key)}
-                  className={`w-12 h-12 md:w-14 md:h-14 rounded-2xl flex flex-col items-center justify-center gap-1 transition-all ${
-                    isActive
-                      ? 'bg-gradient-to-br from-[#0284C7] to-[#0369A1] text-white shadow-md shadow-sky-500/25 scale-105'
-                      : 'text-[#7896A6] dark:text-[#648496] hover:text-[#0284C7] dark:hover:text-[#38BDF8] hover:bg-white dark:hover:bg-[#1A2E3B]'
-                  }`}
+                  className={`w-12 h-12 md:w-14 md:h-14 rounded-2xl flex flex-col items-center justify-center gap-1 transition-all ${isActive
+                    ? 'bg-gradient-to-br from-[#0284C7] to-[#0369A1] text-white shadow-md shadow-sky-500/25 scale-105'
+                    : 'text-[#648496] hover:text-[#38BDF8] hover:bg-[#1A2E3B]'
+                    }`}
                   title={item.label}
                 >
                   <IconComp className="w-5 h-5 shrink-0" />
@@ -899,8 +863,8 @@ export function AdminPage() {
               );
             })}
 
-            <div className="hidden md:flex mt-auto pt-4 text-[#A1B8C5] dark:text-[#425E70]">
-              <div className="w-1.5 h-1.5 rounded-full bg-[#A1B8C5] dark:bg-[#425E70]"></div>
+            <div className="hidden md:flex mt-auto pt-4 text-[#425E70]">
+              <div className="w-1.5 h-1.5 rounded-full bg-[#425E70]"></div>
             </div>
           </aside>
 
@@ -1075,7 +1039,7 @@ export function AdminPage() {
                               282.7 -
                               ((stats.categoryCounts['olive-oil'] || 0) /
                                 Math.max(1, stats.totalProducts)) *
-                                282.7
+                              282.7
                             }
                             strokeLinecap="round"
                             fill="transparent"
@@ -1093,7 +1057,7 @@ export function AdminPage() {
                               282.7 -
                               ((stats.categoryCounts.poultry || 0) /
                                 Math.max(1, stats.totalProducts)) *
-                                282.7
+                              282.7
                             }
                             strokeLinecap="round"
                             fill="transparent"
@@ -1111,7 +1075,7 @@ export function AdminPage() {
                               282.7 -
                               ((stats.categoryCounts.vegetables || 0) /
                                 Math.max(1, stats.totalProducts)) *
-                                282.7
+                              282.7
                             }
                             strokeLinecap="round"
                             fill="transparent"
@@ -1147,7 +1111,7 @@ export function AdminPage() {
                                 24,
                                 ((stats.categoryCounts['olive-oil'] || 0) /
                                   Math.max(1, stats.totalProducts)) *
-                                  100
+                                100
                               )}px`,
                             }}
                           ></div>
@@ -1168,7 +1132,7 @@ export function AdminPage() {
                                 24,
                                 ((stats.categoryCounts.poultry || 0) /
                                   Math.max(1, stats.totalProducts)) *
-                                  100
+                                100
                               )}px`,
                             }}
                           ></div>
@@ -1189,7 +1153,7 @@ export function AdminPage() {
                                 18,
                                 ((stats.categoryCounts.vegetables || 0) /
                                   Math.max(1, stats.totalProducts)) *
-                                  100
+                                100
                               )}px`,
                             }}
                           ></div>
@@ -1248,11 +1212,11 @@ export function AdminPage() {
                         orders.slice(0, 4).map((ord) => {
                           const initials = ord.customer_name
                             ? ord.customer_name
-                                .split(' ')
-                                .map((n) => n[0])
-                                .join('')
-                                .toUpperCase()
-                                .slice(0, 2)
+                              .split(' ')
+                              .map((n) => n[0])
+                              .join('')
+                              .toUpperCase()
+                              .slice(0, 2)
                             : 'CL';
                           return (
                             <div
@@ -1398,987 +1362,984 @@ export function AdminPage() {
               </div>
             )}
 
-      {/* PRODUCTS TAB */}
-      {activeTab === 'products' && (
-        <div className="space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="flex flex-wrap items-center gap-3">
-              <div className="relative">
-                <Search
-                  className="w-4 h-4 text-[#516358] absolute start-3 top-1/2 -translate-y-1/2"
-                  aria-hidden="true"
-                />
-                <input
-                  type="search"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search products…"
-                  aria-label="Search products"
-                  className="ps-9 pe-3 py-2 text-sm rounded-lg border border-[#DCE8DF] bg-white"
-                />
-              </div>
-
-              <select
-                value={categoryFilter}
-                onChange={(e) => setCategoryFilter(e.target.value as 'all' | ProductCategory)}
-                aria-label="Filter products by category"
-                className="px-3 py-2 text-sm rounded-lg border border-[#DCE8DF] bg-white"
-              >
-                <option value="all">{t.common.allCategories}</option>
-                <option value="vegetables">{t.nav.vegetables}</option>
-                <option value="olive-oil">{t.nav.oliveOil}</option>
-                <option value="poultry">{t.nav.poultry}</option>
-              </select>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => {
-                setProductForm(EMPTY_PRODUCT_FORM);
-                setProductError(null);
-                setShowProductForm(true);
-              }}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[#0E3B22] hover:bg-[#082716] text-white text-xs sm:text-sm font-semibold whitespace-nowrap shrink-0"
-            >
-              <Plus className="w-4 h-4" aria-hidden="true" />
-              <span>{t.admin.addProduct}</span>
-            </button>
-          </div>
-
-          {showProductForm && (
-            <form
-              onSubmit={handleSaveProduct}
-              className="bg-white rounded-xl border border-[#0E3B22]/40 p-6 space-y-5"
-            >
-              <div className="flex items-center justify-between">
-                <h2 className="font-display text-lg font-semibold text-[#0F2418]">
-                  {productForm.id ? t.admin.editProduct : t.admin.addProduct}
-                </h2>
-                <button
-                  type="button"
-                  onClick={() => setShowProductForm(false)}
-                  className="text-xs font-semibold text-[#516358] hover:text-[#0F2418]"
-                >
-                  {t.common.cancel}
-                </button>
-              </div>
-
-              {productError && (
-                <div className="p-3 rounded-lg bg-[#FEE2E2] text-[#991B1B] text-xs font-medium">
-                  {productError}
-                </div>
-              )}
-
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-xs font-medium text-[#4A5D52] mb-1">Category</label>
-                  <select
-                    value={productForm.category}
-                    onChange={(e) =>
-                      setProductForm((prev) => ({
-                        ...prev,
-                        category: e.target.value as ProductCategory,
-                      }))
-                    }
-                    className="w-full px-3 py-2 text-sm rounded-lg border border-[#DCE8DF] bg-[#F7FAF7]"
-                  >
-                    <option value="vegetables">{t.nav.vegetables}</option>
-                    <option value="olive-oil">{t.nav.oliveOil}</option>
-                    <option value="poultry">{t.nav.poultry}</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-medium text-[#4A5D52] mb-1">
-                    Subcategory
-                  </label>
-                  <input
-                    type="text"
-                    value={productForm.subcategory}
-                    onChange={(e) =>
-                      setProductForm((prev) => ({ ...prev, subcategory: e.target.value }))
-                    }
-                    className="w-full px-3 py-2 text-sm rounded-lg border border-[#DCE8DF] bg-[#F7FAF7]"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-xs font-medium text-[#4A5D52] mb-1">
-                      Price (MAD) *
-                    </label>
-                    <input
-                      type="number"
-                      step="0.5"
-                      min="1"
-                      value={productForm.price_mad}
-                      onChange={(e) =>
-                        setProductForm((prev) => ({ ...prev, price_mad: e.target.value }))
-                      }
-                      className="w-full px-3 py-2 text-sm rounded-lg border border-[#DCE8DF] bg-[#F7FAF7] tabular-nums"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-medium text-[#4A5D52] mb-1">Stock</label>
-                    <input
-                      type="number"
-                      min="0"
-                      value={productForm.stock}
-                      onChange={(e) =>
-                        setProductForm((prev) => ({ ...prev, stock: e.target.value }))
-                      }
-                      className="w-full px-3 py-2 text-sm rounded-lg border border-[#DCE8DF] bg-[#F7FAF7] tabular-nums"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-xs font-medium text-[#4A5D52] mb-1">
-                    Nom (FR) *
-                  </label>
-                  <input
-                    type="text"
-                    value={productForm.name_fr}
-                    onChange={(e) =>
-                      setProductForm((prev) => ({ ...prev, name_fr: e.target.value }))
-                    }
-                    className="w-full px-3 py-2 text-sm rounded-lg border border-[#DCE8DF] bg-[#F7FAF7]"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-[#4A5D52] mb-1">Name (EN)</label>
-                  <input
-                    type="text"
-                    value={productForm.name_en}
-                    onChange={(e) =>
-                      setProductForm((prev) => ({ ...prev, name_en: e.target.value }))
-                    }
-                    className="w-full px-3 py-2 text-sm rounded-lg border border-[#DCE8DF] bg-[#F7FAF7]"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-[#4A5D52] mb-1">
-                    الاسم (AR)
-                  </label>
-                  <input
-                    type="text"
-                    dir="rtl"
-                    value={productForm.name_ar}
-                    onChange={(e) =>
-                      setProductForm((prev) => ({ ...prev, name_ar: e.target.value }))
-                    }
-                    className="w-full px-3 py-2 text-sm rounded-lg border border-[#DCE8DF] bg-[#F7FAF7]"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-xs font-medium text-[#4A5D52] mb-1">
-                    Description (FR)
-                  </label>
-                  <textarea
-                    rows={2}
-                    value={productForm.desc_fr}
-                    onChange={(e) =>
-                      setProductForm((prev) => ({ ...prev, desc_fr: e.target.value }))
-                    }
-                    className="w-full px-3 py-2 text-sm rounded-lg border border-[#DCE8DF] bg-[#F7FAF7]"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-[#4A5D52] mb-1">
-                    Description (EN)
-                  </label>
-                  <textarea
-                    rows={2}
-                    value={productForm.desc_en}
-                    onChange={(e) =>
-                      setProductForm((prev) => ({ ...prev, desc_en: e.target.value }))
-                    }
-                    className="w-full px-3 py-2 text-sm rounded-lg border border-[#DCE8DF] bg-[#F7FAF7]"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-[#4A5D52] mb-1">
-                    الوصف (AR)
-                  </label>
-                  <textarea
-                    rows={2}
-                    dir="rtl"
-                    value={productForm.desc_ar}
-                    onChange={(e) =>
-                      setProductForm((prev) => ({ ...prev, desc_ar: e.target.value }))
-                    }
-                    className="w-full px-3 py-2 text-sm rounded-lg border border-[#DCE8DF] bg-[#F7FAF7]"
-                  />
-                </div>
-              </div>
-
-              {/* Image Upload & Preset Selection */}
-              <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
-                <div className="sm:col-span-6 space-y-2">
-                  <label className="block text-xs font-medium text-[#4A5D52]">
-                    Product Image URL or Upload
-                  </label>
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="text"
-                      value={productForm.image_url}
-                      onChange={(e) =>
-                        setProductForm((prev) => ({ ...prev, image_url: e.target.value }))
-                      }
-                      className="flex-1 px-3 py-2 text-xs rounded-lg border border-[#DCE8DF] bg-[#F7FAF7]"
-                    />
-                    <label className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-[#0E3B22] text-[#0E3B22] text-xs font-semibold cursor-pointer hover:bg-[#0E3B22]/5 whitespace-nowrap">
-                      <Upload className="w-3.5 h-3.5" aria-hidden="true" />
-                      <span>{uploadingImage ? t.admin.uploading : t.admin.uploadImage}</span>
-                      <input
-                        type="file"
-                        accept="image/jpeg,image/png,image/webp"
-                        onChange={handleImageFileUpload}
-                        className="sr-only"
+            {/* PRODUCTS TAB */}
+            {activeTab === 'products' && (
+              <div className="space-y-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="flex flex-wrap items-center gap-3">
+                    <div className="relative">
+                      <Search
+                        className="w-4 h-4 text-[#7A98A8] absolute start-3 top-1/2 -translate-y-1/2"
+                        aria-hidden="true"
                       />
-                    </label>
-                  </div>
-                  <div className="flex flex-wrap gap-1.5">
-                    {PRESET_IMAGES.map((img) => {
-                      const isSelected = productForm.image_url === img.url;
-                      return (
-                        <button
-                          key={img.url}
-                          type="button"
-                          onClick={() => setProductForm((prev) => ({ ...prev, image_url: img.url }))}
-                          className={`px-2.5 py-1 rounded border text-xs transition-colors ${
-                            isSelected
-                              ? 'border-[#0E3B22] bg-[#0E3B22]/10 text-[#0E3B22] font-semibold'
-                              : 'border-[#DCE8DF] text-[#516358] hover:bg-[#EDF4EE]'
-                          }`}
-                        >
-                          {img.label}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
+                      <input
+                        type="search"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        placeholder="Rechercher un produit…"
+                        aria-label="Rechercher un produit"
+                        className="ps-9 pe-3 py-2 text-sm rounded-xl border border-[#1E3444] bg-[#0B151C] text-[#EEF6FA] placeholder-[#557182] focus:outline-none focus:border-sky-500"
+                      />
+                    </div>
 
-                <div className="sm:col-span-3 flex items-center gap-6">
-                  <label className="inline-flex items-center gap-2 text-xs font-medium text-[#0F2418]">
-                    <input
-                      type="checkbox"
-                      checked={productForm.available}
-                      onChange={(e) =>
-                        setProductForm((prev) => ({ ...prev, available: e.target.checked }))
-                      }
-                    />
-                    <span>Available</span>
-                  </label>
-                  <label className="inline-flex items-center gap-2 text-xs font-medium text-[#0F2418]">
-                    <input
-                      type="checkbox"
-                      checked={productForm.featured}
-                      onChange={(e) =>
-                        setProductForm((prev) => ({ ...prev, featured: e.target.checked }))
-                      }
-                    />
-                    <span>Featured</span>
-                  </label>
-                </div>
+                    <select
+                      value={categoryFilter}
+                      onChange={(e) => setCategoryFilter(e.target.value as 'all' | ProductCategory)}
+                      aria-label="Filtrer par catégorie"
+                      className="px-3.5 py-2 text-sm rounded-xl border border-[#1E3444] bg-[#0B151C] text-[#EEF6FA] focus:outline-none focus:border-sky-500"
+                    >
+                      <option value="all">{t.common.allCategories}</option>
+                      <option value="vegetables">{t.nav.vegetables}</option>
+                      <option value="olive-oil">{t.nav.oliveOil}</option>
+                      <option value="poultry">{t.nav.poultry}</option>
+                    </select>
+                  </div>
 
-                <div className="sm:col-span-3 flex justify-end">
                   <button
-                    type="submit"
-                    disabled={savingProduct}
-                    className="px-5 py-2.5 rounded-lg bg-[#0E3B22] hover:bg-[#082716] text-white text-sm font-semibold"
+                    type="button"
+                    onClick={() => {
+                      setProductForm(EMPTY_PRODUCT_FORM);
+                      setProductError(null);
+                      setShowProductForm(true);
+                    }}
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#0284C7] to-[#0369A1] hover:from-[#0369A1] hover:to-[#075985] text-white text-xs sm:text-sm font-semibold whitespace-nowrap shrink-0 shadow-md shadow-sky-500/20 transition-all hover:scale-[1.02]"
                   >
-                    {savingProduct ? t.common.loading : t.common.save}
+                    <Plus className="w-4 h-4" aria-hidden="true" />
+                    <span>{t.admin.addProduct}</span>
                   </button>
                 </div>
-              </div>
-            </form>
-          )}
 
-          {/* Products Table */}
-          <div className="bg-white rounded-xl border border-[#DCE8DF] overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-[#DCE8DF] text-xs text-[#516358]">
-                  <th className="py-3 px-4 font-medium text-start">Product</th>
-                  <th className="py-3 px-4 font-medium text-start">Category</th>
-                  <th className="py-3 px-4 font-medium text-end">Price</th>
-                  <th className="py-3 px-4 font-medium text-end">Stock</th>
-                  <th className="py-3 px-4 font-medium text-start">Status</th>
-                  <th className="py-3 px-4 font-medium text-end">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#DCE8DF]/70">
-                {filteredProducts.map((p) => (
-                  <tr key={p.id} className="hover:bg-[#F7FAF7]/70">
-                    <td className="py-3 px-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-11 h-11 rounded-lg overflow-hidden bg-[#EDF4EE] shrink-0">
-                          <ResilientImage
-                            src={p.image_url}
-                            alt={p.name_fr}
-                            className="w-full h-full object-cover"
+                {showProductForm && (
+                  <form
+                    onSubmit={handleSaveProduct}
+                    className="bg-[#12222B] rounded-2xl border border-[#1E3444] p-6 space-y-5 shadow-lg"
+                  >
+                    <div className="flex items-center justify-between">
+                      <h2 className="font-display text-lg font-semibold text-[#EEF6FA]">
+                        {productForm.id ? t.admin.editProduct : t.admin.addProduct}
+                      </h2>
+                      <button
+                        type="button"
+                        onClick={() => setShowProductForm(false)}
+                        className="text-xs font-semibold text-[#7A98A8] hover:text-[#EEF6FA] transition-colors"
+                      >
+                        {t.common.cancel}
+                      </button>
+                    </div>
+
+                    {productError && (
+                      <div className="p-3 rounded-lg bg-red-950/60 border border-red-800 text-red-200 text-xs font-medium">
+                        {productError}
+                      </div>
+                    )}
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <div>
+                        <label className="block text-xs font-medium text-[#8AA4B4] mb-1">Catégorie</label>
+                        <select
+                          value={productForm.category}
+                          onChange={(e) =>
+                            setProductForm((prev) => ({
+                              ...prev,
+                              category: e.target.value as ProductCategory,
+                            }))
+                          }
+                          className="w-full px-3 py-2 text-sm rounded-lg border border-[#1E3444] bg-[#0B151C] text-white"
+                        >
+                          <option value="vegetables">{t.nav.vegetables}</option>
+                          <option value="olive-oil">{t.nav.oliveOil}</option>
+                          <option value="poultry">{t.nav.poultry}</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-medium text-[#8AA4B4] mb-1">
+                          Sous-catégorie
+                        </label>
+                        <input
+                          type="text"
+                          value={productForm.subcategory}
+                          onChange={(e) =>
+                            setProductForm((prev) => ({ ...prev, subcategory: e.target.value }))
+                          }
+                          className="w-full px-3 py-2 text-sm rounded-lg border border-[#1E3444] bg-[#0B151C] text-white"
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-xs font-medium text-[#8AA4B4] mb-1">
+                            Prix (MAD) *
+                          </label>
+                          <input
+                            type="number"
+                            step="0.5"
+                            min="1"
+                            value={productForm.price_mad}
+                            onChange={(e) =>
+                              setProductForm((prev) => ({ ...prev, price_mad: e.target.value }))
+                            }
+                            className="w-full px-3 py-2 text-sm rounded-lg border border-[#1E3444] bg-[#0B151C] text-white tabular-nums"
                           />
                         </div>
                         <div>
-                          <div className="font-semibold text-[#0F2418]">
-                            {getLocalizedField(p, 'name', lang)}
-                          </div>
-                          <div className="text-xs text-[#516358]">
-                            {getLocalizedField(p, 'unit', lang)}
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="py-3 px-4 text-xs text-[#516358]">{p.category}</td>
-                    <td className="py-3 px-4 text-end font-semibold tabular-nums">
-                      {formatMad(p.price_mad, lang)}
-                    </td>
-                    <td className="py-3 px-4 text-end font-mono tabular-nums">{p.stock}</td>
-                    <td className="py-3 px-4">
-                      <button
-                        type="button"
-                        onClick={() => handleToggleProductAvailability(p)}
-                        className={`px-2.5 py-1 rounded text-xs font-medium ${
-                          p.available
-                            ? 'bg-[#0E3B22]/15 text-[#082716]'
-                            : 'bg-neutral-200 text-neutral-700'
-                        }`}
-                      >
-                        {p.available ? 'Active' : 'Hidden'}
-                      </button>
-                    </td>
-                    <td className="py-3 px-4 text-end">
-                      <div className="inline-flex items-center gap-2">
-                        <button
-                          type="button"
-                          aria-label={`Edit ${p.name_fr}`}
-                          onClick={() => {
-                            setProductForm({
-                              id: p.id,
-                              category: p.category,
-                              subcategory: p.subcategory,
-                              name_fr: p.name_fr,
-                              name_en: p.name_en,
-                              name_ar: p.name_ar,
-                              desc_fr: p.desc_fr,
-                              desc_en: p.desc_en,
-                              desc_ar: p.desc_ar,
-                              price_mad: String(p.price_mad),
-                              unit_fr: p.unit_fr,
-                              unit_en: p.unit_en,
-                              unit_ar: p.unit_ar,
-                              stock: String(p.stock),
-                              available: p.available,
-                              featured: p.featured,
-                              image_url: p.image_url,
-                              harvest_note_fr: p.harvest_note_fr,
-                              harvest_note_en: p.harvest_note_en,
-                              harvest_note_ar: p.harvest_note_ar,
-                            });
-                            setShowProductForm(true);
-                          }}
-                          className="p-1.5 rounded-lg border border-[#DCE8DF] hover:bg-[#EDF4EE] text-[#4A5D52]"
-                        >
-                          <Edit3 className="w-4 h-4" />
-                        </button>
-                        <button
-                          type="button"
-                          aria-label={`Delete ${p.name_fr}`}
-                          onClick={() => handleDeleteProduct(p)}
-                          className="p-1.5 rounded-lg border border-[#DCE8DF] hover:bg-red-50 text-[#9E2A2B]"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
-
-      {/* ORDERS TAB */}
-      {activeTab === 'orders' && (
-        <div className="space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="flex flex-wrap gap-2">
-              {(
-                [
-                  'all',
-                  'pending',
-                  'confirmed',
-                  'preparing',
-                  'shipped',
-                  'completed',
-                  'cancelled',
-                ] as const
-              ).map((statusKey) => (
-                <button
-                  key={statusKey}
-                  type="button"
-                  onClick={() => {
-                    setOrderStatusFilter(statusKey);
-                    setOrderPage(1);
-                  }}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${
-                    orderStatusFilter === statusKey
-                      ? 'bg-[#0E3B22] text-white border-[#0E3B22]'
-                      : 'bg-white text-[#4A5D52] border-[#DCE8DF]'
-                  }`}
-                >
-                  {statusKey}
-                </button>
-              ))}
-            </div>
-
-            <div className="flex items-center gap-2">
-              <div className="flex items-center gap-1.5 text-xs font-semibold text-[#516358]">
-                <Calendar className="w-4 h-4 text-[#2E7D47]" />
-                <span>Année :</span>
-              </div>
-              <div className="flex items-center gap-1.5 bg-white border border-[#DCE8DF] rounded-lg p-1">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setOrderYearFilter('all');
-                    setOrderPage(1);
-                  }}
-                  className={`px-2.5 py-1 rounded text-xs font-semibold transition-colors ${
-                    orderYearFilter === 'all'
-                      ? 'bg-[#0E3B22] text-white shadow-xs'
-                      : 'text-[#4A5D52] hover:text-[#0E3B22]'
-                  }`}
-                >
-                  Toutes
-                </button>
-                {(availableOrderYears.length > 0
-                  ? availableOrderYears
-                  : [String(new Date().getFullYear())]
-                ).map((yr) => (
-                  <button
-                    key={yr}
-                    type="button"
-                    onClick={() => {
-                      setOrderYearFilter(yr);
-                      setOrderPage(1);
-                    }}
-                    className={`px-2.5 py-1 rounded text-xs font-semibold transition-colors ${
-                      orderYearFilter === yr
-                        ? 'bg-[#0E3B22] text-white shadow-xs'
-                        : 'text-[#4A5D52] hover:text-[#0E3B22]'
-                    }`}
-                  >
-                    {yr}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl border border-[#DCE8DF] overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-[#DCE8DF] text-xs text-[#516358]">
-                  <th className="py-3 px-4 font-medium text-start">Order</th>
-                  <th className="py-3 px-4 font-medium text-start">Customer</th>
-                  <th className="py-3 px-4 font-medium text-start">Items</th>
-                  <th className="py-3 px-4 font-medium text-start">Email Alert</th>
-                  <th className="py-3 px-4 font-medium text-end">Total</th>
-                  <th className="py-3 px-4 font-medium text-start">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#DCE8DF]/70">
-                {paginatedOrders.length === 0 ? (
-                  <tr>
-                    <td colSpan={6} className="py-12 text-center text-sm text-[#516358]">
-                      Aucune commande trouvée pour ces critères.
-                    </td>
-                  </tr>
-                ) : (
-                  paginatedOrders.map((ord) => (
-                    <tr key={ord.id} className="align-top">
-                      <td className="py-3.5 px-4">
-                        <div className="font-mono text-xs font-semibold tabular-nums">{ord.id}</div>
-                        <div className="text-xs text-[#516358] mt-0.5">
-                          {new Date(ord.created_at).toLocaleDateString()}
-                        </div>
-                      </td>
-                      <td className="py-3.5 px-4 space-y-0.5">
-                        <div className="font-semibold text-[#0F2418]">{ord.customer_name}</div>
-                        <div className="text-xs text-[#4A5D52] font-mono tabular-nums" dir="ltr">
-                          {ord.customer_phone}
-                        </div>
-                        <div className="text-xs text-[#516358]">
-                          {ord.city} · {ord.address}
-                        </div>
-                      </td>
-                      <td className="py-3.5 px-4">
-                        <ul className="space-y-1 text-xs text-[#4A5D52]">
-                          {ord.items.map((it, idx) => (
-                            <li key={idx}>
-                              {it.quantity} × {it.name}
-                              {it.variantLabel ? ` (${it.variantLabel})` : ''}
-                            </li>
-                          ))}
-                        </ul>
-                      </td>
-                      <td className="py-3.5 px-4 space-y-1">
-                        <span
-                          className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${
-                            ord.email_status === 'sent'
-                              ? 'bg-emerald-100 text-emerald-900'
-                              : ord.email_status === 'failed'
-                                ? 'bg-red-100 text-red-900'
-                                : 'bg-amber-100 text-amber-900'
-                          }`}
-                        >
-                          {ord.email_status === 'sent'
-                            ? 'Sent'
-                            : ord.email_status === 'failed'
-                              ? 'Failed'
-                              : ord.email_status === 'pending_smtp'
-                                ? 'Pending SMTP'
-                                : 'Pending EmailJS'}
-                        </span>
-                        <div className="text-xs text-[#516358] font-mono" dir="ltr">
-                          {ord.email_recipient || 'domaineessaoudi@gmail.com'}
-                        </div>
-                      </td>
-                      <td className="py-3.5 px-4 text-end font-bold tabular-nums">
-                        {formatMad(ord.total_mad, lang)}
-                      </td>
-                      <td className="py-3.5 px-4">
-                        <div className="flex items-center gap-2">
-                          <select
-                            value={ord.status}
-                            aria-label={`Order status for ${ord.id}`}
+                          <label className="block text-xs font-medium text-[#8AA4B4] mb-1">Stock</label>
+                          <input
+                            type="number"
+                            min="0"
+                            value={productForm.stock}
                             onChange={(e) =>
-                              handleOrderStatusChange(ord.id, e.target.value as OrderStatus)
+                              setProductForm((prev) => ({ ...prev, stock: e.target.value }))
                             }
-                            className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-[#DCE8DF] ${ORDER_STATUS_STYLES[ord.status]}`}
-                          >
-                            <option value="pending">pending</option>
-                            <option value="confirmed">confirmed</option>
-                            <option value="preparing">preparing</option>
-                            <option value="shipped">shipped</option>
-                            <option value="completed">completed</option>
-                            <option value="cancelled">cancelled</option>
-                          </select>
-                          <button
-                            type="button"
-                            aria-label={`Delete order ${ord.id}`}
-                            onClick={() => handleDeleteOrder(ord.id)}
-                            className="p-1.5 rounded-lg border border-[#DCE8DF] hover:bg-red-50 text-[#9E2A2B]"
-                          >
-                            <Trash2 className="w-4 h-4" aria-hidden="true" />
-                          </button>
+                            className="w-full px-3 py-2 text-sm rounded-lg border border-[#1E3444] bg-[#0B151C] text-white tabular-nums"
+                          />
                         </div>
-                      </td>
-                    </tr>
-                  ))
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <div>
+                        <label className="block text-xs font-medium text-[#8AA4B4] mb-1">
+                          Nom (FR) *
+                        </label>
+                        <input
+                          type="text"
+                          value={productForm.name_fr}
+                          onChange={(e) =>
+                            setProductForm((prev) => ({ ...prev, name_fr: e.target.value }))
+                          }
+                          className="w-full px-3 py-2 text-sm rounded-lg border border-[#1E3444] bg-[#0B151C] text-white"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-[#8AA4B4] mb-1">Nom (EN)</label>
+                        <input
+                          type="text"
+                          value={productForm.name_en}
+                          onChange={(e) =>
+                            setProductForm((prev) => ({ ...prev, name_en: e.target.value }))
+                          }
+                          className="w-full px-3 py-2 text-sm rounded-lg border border-[#1E3444] bg-[#0B151C] text-white"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-[#8AA4B4] mb-1">
+                          الاسم (AR)
+                        </label>
+                        <input
+                          type="text"
+                          dir="rtl"
+                          value={productForm.name_ar}
+                          onChange={(e) =>
+                            setProductForm((prev) => ({ ...prev, name_ar: e.target.value }))
+                          }
+                          className="w-full px-3 py-2 text-sm rounded-lg border border-[#1E3444] bg-[#0B151C] text-white"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <div>
+                        <label className="block text-xs font-medium text-[#8AA4B4] mb-1">
+                          Description (FR)
+                        </label>
+                        <textarea
+                          rows={2}
+                          value={productForm.desc_fr}
+                          onChange={(e) =>
+                            setProductForm((prev) => ({ ...prev, desc_fr: e.target.value }))
+                          }
+                          className="w-full px-3 py-2 text-sm rounded-lg border border-[#1E3444] bg-[#0B151C] text-white"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-[#8AA4B4] mb-1">
+                          Description (EN)
+                        </label>
+                        <textarea
+                          rows={2}
+                          value={productForm.desc_en}
+                          onChange={(e) =>
+                            setProductForm((prev) => ({ ...prev, desc_en: e.target.value }))
+                          }
+                          className="w-full px-3 py-2 text-sm rounded-lg border border-[#1E3444] bg-[#0B151C] text-white"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-[#8AA4B4] mb-1">
+                          الوصف (AR)
+                        </label>
+                        <textarea
+                          rows={2}
+                          dir="rtl"
+                          value={productForm.desc_ar}
+                          onChange={(e) =>
+                            setProductForm((prev) => ({ ...prev, desc_ar: e.target.value }))
+                          }
+                          className="w-full px-3 py-2 text-sm rounded-lg border border-[#1E3444] bg-[#0B151C] text-white"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Image Upload & Preset Selection */}
+                    <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
+                      <div className="sm:col-span-6 space-y-2">
+                        <label className="block text-xs font-medium text-[#8AA4B4]">
+                          Image URL ou Téléchargement
+                        </label>
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="text"
+                            value={productForm.image_url}
+                            onChange={(e) =>
+                              setProductForm((prev) => ({ ...prev, image_url: e.target.value }))
+                            }
+                            className="flex-1 px-3 py-2 text-xs rounded-lg border border-[#1E3444] bg-[#0B151C] text-white"
+                          />
+                          <label className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-[#0284C7] text-[#38BDF8] text-xs font-semibold cursor-pointer hover:bg-sky-500/10 whitespace-nowrap transition-colors">
+                            <Upload className="w-3.5 h-3.5" aria-hidden="true" />
+                            <span>{uploadingImage ? t.admin.uploading : t.admin.uploadImage}</span>
+                            <input
+                              type="file"
+                              accept="image/jpeg,image/png,image/webp"
+                              onChange={handleImageFileUpload}
+                              className="sr-only"
+                            />
+                          </label>
+                        </div>
+                        <div className="flex flex-wrap gap-1.5">
+                          {PRESET_IMAGES.map((img) => {
+                            const isSelected = productForm.image_url === img.url;
+                            return (
+                              <button
+                                key={img.url}
+                                type="button"
+                                onClick={() => setProductForm((prev) => ({ ...prev, image_url: img.url }))}
+                                className={`px-2.5 py-1 rounded-lg border text-xs transition-colors ${isSelected
+                                  ? 'border-[#0284C7] bg-[#0284C7]/20 text-[#38BDF8] font-semibold'
+                                  : 'border-[#1E3444] text-[#7A98A8] hover:bg-[#162833]'
+                                  }`}
+                              >
+                                {img.label}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      <div className="sm:col-span-3 flex items-center gap-6">
+                        <label className="inline-flex items-center gap-2 text-xs font-medium text-[#EEF6FA] cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={productForm.available}
+                            onChange={(e) =>
+                              setProductForm((prev) => ({ ...prev, available: e.target.checked }))
+                            }
+                            className="rounded border-[#1E3444] text-[#0284C7] focus:ring-0"
+                          />
+                          <span>Actif (Disponible)</span>
+                        </label>
+                        <label className="inline-flex items-center gap-2 text-xs font-medium text-[#EEF6FA] cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={productForm.featured}
+                            onChange={(e) =>
+                              setProductForm((prev) => ({ ...prev, featured: e.target.checked }))
+                            }
+                            className="rounded border-[#1E3444] text-[#0284C7] focus:ring-0"
+                          />
+                          <span>Mis en avant</span>
+                        </label>
+                      </div>
+
+                      <div className="sm:col-span-3 flex justify-end">
+                        <button
+                          type="submit"
+                          disabled={savingProduct}
+                          className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#0284C7] to-[#0369A1] hover:from-[#0369A1] hover:to-[#075985] text-white text-sm font-semibold shadow-md shadow-sky-500/20"
+                        >
+                          {savingProduct ? t.common.loading : t.common.save}
+                        </button>
+                      </div>
+                    </div>
+                  </form>
                 )}
-              </tbody>
-            </table>
-          </div>
 
-          {filteredOrders.length > 0 && (
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-4 py-3 bg-white rounded-xl border border-[#DCE8DF]">
-              <div className="text-xs text-[#516358]">
-                Affichage de{' '}
-                <span className="font-semibold text-[#0F2418]">
-                  {(currentPage - 1) * ordersPerPage + 1}
-                </span>{' '}
-                à{' '}
-                <span className="font-semibold text-[#0F2418]">
-                  {Math.min(currentPage * ordersPerPage, filteredOrders.length)}
-                </span>{' '}
-                sur <span className="font-semibold text-[#0F2418]">{filteredOrders.length}</span>{' '}
-                commandes
+                {/* Products Table (Aligned with Dashboard Theme) */}
+                <div className="bg-[#12222B] rounded-2xl border border-[#1E3444] overflow-hidden shadow-lg">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="bg-[#0E1A22] border-b border-[#1E3444] text-xs font-semibold text-[#7A98A8] uppercase tracking-wider">
+                          <th className="py-3.5 px-4 text-start">Produit</th>
+                          <th className="py-3.5 px-4 text-start">Catégorie</th>
+                          <th className="py-3.5 px-4 text-end">Prix</th>
+                          <th className="py-3.5 px-4 text-end">Stock</th>
+                          <th className="py-3.5 px-4 text-start">Statut</th>
+                          <th className="py-3.5 px-4 text-end">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-[#1A2E3B] text-[#C5D9E5]">
+                        {filteredProducts.map((p) => (
+                          <tr key={p.id} className="hover:bg-[#162833] transition-colors">
+                            <td className="py-3 px-4">
+                              <div className="flex items-center gap-3">
+                                <div className="w-11 h-11 rounded-xl overflow-hidden bg-[#0B151C] border border-[#1E3444] shrink-0">
+                                  <ResilientImage
+                                    src={p.image_url}
+                                    alt={p.name_fr}
+                                    className="w-full h-full object-cover"
+                                  />
+                                </div>
+                                <div>
+                                  <div className="font-semibold text-[#EEF6FA]">
+                                    {getLocalizedField(p, 'name', lang)}
+                                  </div>
+                                  <div className="text-xs text-[#7A98A8]">
+                                    {getLocalizedField(p, 'unit', lang)}
+                                  </div>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="py-3 px-4 text-xs text-[#8AA4B4]">{p.category}</td>
+                            <td className="py-3 px-4 text-end font-semibold text-[#EEF6FA] tabular-nums">
+                              {formatMad(p.price_mad, lang)}
+                            </td>
+                            <td className="py-3 px-4 text-end font-mono tabular-nums text-[#38BDF8]">{p.stock}</td>
+                            <td className="py-3 px-4">
+                              <button
+                                type="button"
+                                onClick={() => handleToggleProductAvailability(p)}
+                                className={`px-2.5 py-1 rounded-full text-[11px] font-semibold border transition-colors ${p.available
+                                  ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
+                                  : 'bg-neutral-800 text-neutral-400 border-neutral-700'
+                                  }`}
+                              >
+                                {p.available ? 'Actif' : 'Masqué'}
+                              </button>
+                            </td>
+                            <td className="py-3 px-4 text-end">
+                              <div className="inline-flex items-center gap-2">
+                                <button
+                                  type="button"
+                                  aria-label={`Modifier ${p.name_fr}`}
+                                  onClick={() => {
+                                    setProductForm({
+                                      id: p.id,
+                                      category: p.category,
+                                      subcategory: p.subcategory,
+                                      name_fr: p.name_fr,
+                                      name_en: p.name_en,
+                                      name_ar: p.name_ar,
+                                      desc_fr: p.desc_fr,
+                                      desc_en: p.desc_en,
+                                      desc_ar: p.desc_ar,
+                                      price_mad: String(p.price_mad),
+                                      unit_fr: p.unit_fr,
+                                      unit_en: p.unit_en,
+                                      unit_ar: p.unit_ar,
+                                      stock: String(p.stock),
+                                      available: p.available,
+                                      featured: p.featured,
+                                      image_url: p.image_url,
+                                      harvest_note_fr: p.harvest_note_fr,
+                                      harvest_note_en: p.harvest_note_en,
+                                      harvest_note_ar: p.harvest_note_ar,
+                                    });
+                                    setShowProductForm(true);
+                                  }}
+                                  className="p-1.5 rounded-lg border border-[#1E3444] bg-[#0B151C] hover:bg-[#1A2E3B] text-[#7A98A8] hover:text-[#38BDF8] transition-colors"
+                                >
+                                  <Edit3 className="w-4 h-4" />
+                                </button>
+                                <button
+                                  type="button"
+                                  aria-label={`Supprimer ${p.name_fr}`}
+                                  onClick={() => handleDeleteProduct(p)}
+                                  className="p-1.5 rounded-lg border border-[#1E3444] bg-[#0B151C] hover:bg-red-950/40 text-red-400 transition-colors"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
               </div>
+            )}
 
-              {totalOrderPages > 1 && (
-                <div className="flex items-center gap-1.5">
-                  <button
-                    type="button"
-                    onClick={() => setOrderPage((p) => Math.max(1, p - 1))}
-                    disabled={currentPage === 1}
-                    aria-label="Page précédente"
-                    className="p-1.5 rounded-lg border border-[#DCE8DF] bg-white text-[#4A5D52] hover:bg-[#F2F7F4] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-                  >
-                    <ChevronLeft className="w-4 h-4" />
-                  </button>
-
-                  <div className="flex items-center gap-1">
-                    {Array.from({ length: totalOrderPages }, (_, i) => i + 1).map((pg) => (
+            {/* ORDERS TAB */}
+            {activeTab === 'orders' && (
+              <div className="space-y-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="flex flex-wrap gap-2">
+                    {(
+                      [
+                        'all',
+                        'pending',
+                        'confirmed',
+                        'preparing',
+                        'shipped',
+                        'completed',
+                        'cancelled',
+                      ] as const
+                    ).map((statusKey) => (
                       <button
-                        key={pg}
+                        key={statusKey}
                         type="button"
-                        onClick={() => setOrderPage(pg)}
-                        className={`w-7 h-7 rounded-lg text-xs font-semibold border transition-colors ${
-                          currentPage === pg
-                            ? 'bg-[#0E3B22] text-white border-[#0E3B22]'
-                            : 'bg-white text-[#4A5D52] border-[#DCE8DF] hover:bg-[#F2F7F4]'
-                        }`}
+                        onClick={() => {
+                          setOrderStatusFilter(statusKey);
+                          setOrderPage(1);
+                        }}
+                        className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold border transition-all ${orderStatusFilter === statusKey
+                          ? 'bg-[#0284C7] text-white border-[#0284C7] shadow-md shadow-sky-500/20'
+                          : 'bg-[#12222B] text-[#7A98A8] border-[#1E3444] hover:bg-[#162833] hover:text-[#EEF6FA]'
+                          }`}
                       >
-                        {pg}
+                        {statusKey}
                       </button>
                     ))}
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={() => setOrderPage((p) => Math.min(totalOrderPages, p + 1))}
-                    disabled={currentPage === totalOrderPages}
-                    aria-label="Page suivante"
-                    className="p-1.5 rounded-lg border border-[#DCE8DF] bg-white text-[#4A5D52] hover:bg-[#F2F7F4] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-                  >
-                    <ChevronRight className="w-4 h-4" />
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* CONTENT & INQUIRIES TAB */}
-      {activeTab === 'content' && contentForm && (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          <form
-            onSubmit={handleSaveSiteContent}
-            className="lg:col-span-7 bg-white rounded-xl border border-[#DCE8DF] p-6 space-y-5"
-          >
-            <h2 className="font-display text-lg font-semibold text-[#0F2418]">
-              Website Content & Farm Contacts
-            </h2>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div>
-                <label className="block text-xs font-medium text-[#4A5D52] mb-1">
-                  Farm Phone (+212)
-                </label>
-                <input
-                  type="text"
-                  dir="ltr"
-                  value={contentForm.phone}
-                  onChange={(e) =>
-                    setContentForm((prev) => (prev ? { ...prev, phone: e.target.value } : prev))
-                  }
-                  className="w-full px-3 py-2 text-sm rounded-lg border border-[#DCE8DF] bg-[#F7FAF7]"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-[#4A5D52] mb-1">
-                  WhatsApp (+212)
-                </label>
-                <input
-                  type="text"
-                  dir="ltr"
-                  value={contentForm.whatsapp}
-                  onChange={(e) =>
-                    setContentForm((prev) => (prev ? { ...prev, whatsapp: e.target.value } : prev))
-                  }
-                  className="w-full px-3 py-2 text-sm rounded-lg border border-[#DCE8DF] bg-[#F7FAF7]"
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="admin-order-email"
-                  className="block text-xs font-medium text-[#4A5D52] mb-1"
-                >
-                  Order Email
-                </label>
-                <input
-                  id="admin-order-email"
-                  type="email"
-                  dir="ltr"
-                  value={contentForm.email}
-                  onChange={(e) =>
-                    setContentForm((prev) => (prev ? { ...prev, email: e.target.value } : prev))
-                  }
-                  className="w-full px-3 py-2 text-sm rounded-lg border border-[#DCE8DF] bg-[#F7FAF7]"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label
-                  htmlFor="admin-social-instagram"
-                  className="block text-xs font-medium text-[#4A5D52] mb-1"
-                >
-                  Instagram URL
-                </label>
-                <input
-                  id="admin-social-instagram"
-                  type="url"
-                  dir="ltr"
-                  placeholder="https://www.instagram.com/domaineessaoudi/"
-                  value={contentForm.socialInstagram || ''}
-                  onChange={(e) =>
-                    setContentForm((prev) =>
-                      prev ? { ...prev, socialInstagram: e.target.value } : prev
-                    )
-                  }
-                  className="w-full px-3 py-2 text-sm rounded-lg border border-[#DCE8DF] bg-[#F7FAF7]"
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="admin-social-facebook"
-                  className="block text-xs font-medium text-[#4A5D52] mb-1"
-                >
-                  Facebook URL
-                </label>
-                <input
-                  id="admin-social-facebook"
-                  type="url"
-                  dir="ltr"
-                  placeholder="https://www.facebook.com/profile.php?id=61596964379987"
-                  value={contentForm.socialFacebook || ''}
-                  onChange={(e) =>
-                    setContentForm((prev) =>
-                      prev ? { ...prev, socialFacebook: e.target.value } : prev
-                    )
-                  }
-                  className="w-full px-3 py-2 text-sm rounded-lg border border-[#DCE8DF] bg-[#F7FAF7]"
-                />
-              </div>
-            </div>
-
-            <div className="rounded-xl border border-[#DCE8DF] bg-[#F7FAF7] p-4 space-y-4">
-              {(() => {
-                const ej = resolveEmailJsConfig(contentForm);
-                const isReady = ej.configured || Boolean(emailStatus?.configured);
-                return (
-                  <>
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                      <div className="flex items-center gap-2 text-sm font-semibold text-[#0F2418]">
-                        <Mail className="w-4 h-4 text-[#0E3B22]" aria-hidden="true" />
-                        <span>EmailJS Orders → {ej.recipientEmail}</span>
-                      </div>
-                      <span
-                        className={`px-2 py-0.5 rounded text-xs font-semibold ${
-                          isReady
-                            ? 'bg-emerald-100 text-emerald-900'
-                            : 'bg-amber-100 text-amber-900'
-                        }`}
-                      >
-                        {ej.configured
-                          ? 'EmailJS Active'
-                          : emailStatus?.smtpConfigured
-                            ? 'SMTP Active'
-                            : 'EmailJS IDs Needed'}
-                      </span>
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1.5 text-xs font-semibold text-[#7A98A8]">
+                      <Calendar className="w-4 h-4 text-sky-400" />
+                      <span>Année :</span>
                     </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                      <div>
-                        <label
-                          htmlFor="admin-emailjs-service"
-                          className="block text-xs font-medium text-[#4A5D52] mb-1"
-                        >
-                          EmailJS Service ID
-                        </label>
-                        <input
-                          id="admin-emailjs-service"
-                          type="text"
-                          dir="ltr"
-                          placeholder="service_xxxxxxx"
-                          value={contentForm.emailjsServiceId || ''}
-                          onChange={(e) =>
-                            setContentForm((prev) =>
-                              prev ? { ...prev, emailjsServiceId: e.target.value } : prev
-                            )
-                          }
-                          className="w-full px-3 py-2 text-xs font-mono rounded-lg border border-[#DCE8DF] bg-white"
-                        />
-                      </div>
-                      <div>
-                        <label
-                          htmlFor="admin-emailjs-template"
-                          className="block text-xs font-medium text-[#4A5D52] mb-1"
-                        >
-                          EmailJS Template ID
-                        </label>
-                        <input
-                          id="admin-emailjs-template"
-                          type="text"
-                          dir="ltr"
-                          placeholder="template_xxxxxxx"
-                          value={contentForm.emailjsTemplateId || ''}
-                          onChange={(e) =>
-                            setContentForm((prev) =>
-                              prev ? { ...prev, emailjsTemplateId: e.target.value } : prev
-                            )
-                          }
-                          className="w-full px-3 py-2 text-xs font-mono rounded-lg border border-[#DCE8DF] bg-white"
-                        />
-                      </div>
-                      <div>
-                        <label
-                          htmlFor="admin-emailjs-key"
-                          className="block text-xs font-medium text-[#4A5D52] mb-1"
-                        >
-                          EmailJS Public Key
-                        </label>
-                        <input
-                          id="admin-emailjs-key"
-                          type="text"
-                          dir="ltr"
-                          placeholder="Public Key"
-                          value={contentForm.emailjsPublicKey || ''}
-                          onChange={(e) =>
-                            setContentForm((prev) =>
-                              prev ? { ...prev, emailjsPublicKey: e.target.value } : prev
-                            )
-                          }
-                          className="w-full px-3 py-2 text-xs font-mono rounded-lg border border-[#DCE8DF] bg-white"
-                        />
-                      </div>
-                    </div>
-
-                    <p className="text-xs text-[#516358] leading-relaxed">
-                      EmailJS template variables sent automatically:{' '}
-                      <code className="text-[#0E3B22]">
-                        {'{{to_email}}, {{order_id}}, {{customer_name}}, {{customer_phone}}, {{city}}, {{address}}, {{items_summary}}, {{total_mad}}, {{message}}'}
-                      </code>
-                    </p>
-
-                    <div className="flex flex-wrap items-center gap-3">
+                    <div className="flex items-center gap-1.5 bg-[#0B151C] border border-[#1E3444] rounded-xl p-1">
                       <button
                         type="button"
-                        disabled={sendingTestEmail}
-                        onClick={handleSendTestEmail}
-                        className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg border border-[#0E3B22] text-[#0E3B22] hover:bg-[#0E3B22]/5 disabled:opacity-60 text-xs font-semibold transition-colors"
-                      >
-                        <Send className="w-3.5 h-3.5" aria-hidden="true" />
-                        <span>
-                          {sendingTestEmail ? t.common.loading : 'Test EmailJS Delivery'}
-                        </span>
-                      </button>
-                      {testEmailResult && (
-                        <span
-                          className={`text-xs font-medium ${
-                            testEmailResult.sent ? 'text-emerald-800' : 'text-amber-800'
+                        onClick={() => {
+                          setOrderYearFilter('all');
+                          setOrderPage(1);
+                        }}
+                        className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-colors ${orderYearFilter === 'all'
+                          ? 'bg-[#0284C7] text-white shadow-xs'
+                          : 'text-[#7A98A8] hover:text-[#EEF6FA]'
                           }`}
-                        >
-                          {testEmailResult.sent
-                            ? `Sent via EmailJS to ${testEmailResult.recipient}`
-                            : testEmailResult.error || `Not sent for ${testEmailResult.recipient}`}
-                        </span>
-                      )}
-                    </div>
-                  </>
-                );
-              })()}
-            </div>
-
-            <div className="space-y-3">
-              <div>
-                <label className="block text-xs font-medium text-[#4A5D52] mb-1">
-                  Hero Title (FR)
-                </label>
-                <input
-                  type="text"
-                  value={contentForm.heroTitle_fr}
-                  onChange={(e) =>
-                    setContentForm((prev) =>
-                      prev ? { ...prev, heroTitle_fr: e.target.value } : prev
-                    )
-                  }
-                  className="w-full px-3 py-2 text-sm rounded-lg border border-[#DCE8DF] bg-[#F7FAF7]"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-[#4A5D52] mb-1">
-                  Hero Title (EN)
-                </label>
-                <input
-                  type="text"
-                  value={contentForm.heroTitle_en}
-                  onChange={(e) =>
-                    setContentForm((prev) =>
-                      prev ? { ...prev, heroTitle_en: e.target.value } : prev
-                    )
-                  }
-                  className="w-full px-3 py-2 text-sm rounded-lg border border-[#DCE8DF] bg-[#F7FAF7]"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-[#4A5D52] mb-1">
-                  Hero Title (AR)
-                </label>
-                <input
-                  type="text"
-                  dir="rtl"
-                  value={contentForm.heroTitle_ar}
-                  onChange={(e) =>
-                    setContentForm((prev) =>
-                      prev ? { ...prev, heroTitle_ar: e.target.value } : prev
-                    )
-                  }
-                  className="w-full px-3 py-2 text-sm rounded-lg border border-[#DCE8DF] bg-[#F7FAF7]"
-                />
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              disabled={savingContent}
-              className="px-5 py-2.5 rounded-lg bg-[#0E3B22] hover:bg-[#082716] text-white text-sm font-semibold"
-            >
-              {savingContent ? t.common.loading : t.common.save}
-            </button>
-          </form>
-
-          <div className="lg:col-span-5 bg-white rounded-xl border border-[#DCE8DF] p-6 space-y-4">
-            <h2 className="font-display text-lg font-semibold text-[#0F2418]">
-              Customer Inquiries ({messages.length})
-            </h2>
-            {messages.length === 0 ? (
-              <p className="text-sm text-[#516358]">No inquiries yet.</p>
-            ) : (
-              <div className="divide-y divide-[#DCE8DF] space-y-3">
-                {messages.map((m) => (
-                  <div key={m.id} className="pt-3 first:pt-0 space-y-1.5">
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="font-semibold text-sm text-[#0F2418]">{m.name}</span>
-                      <span className="text-xs font-mono text-[#516358]">{m.status}</span>
-                    </div>
-                    <div className="text-xs text-[#0E3B22] font-mono" dir="ltr">
-                      {m.phone}
-                    </div>
-                    <div className="text-xs font-semibold text-[#4A5D52]">{m.subject}</div>
-                    <p className="text-xs text-[#516358] leading-relaxed">{m.message}</p>
-                    {m.status === 'unread' && (
-                      <button
-                        type="button"
-                        onClick={() => handleMessageStatus(m.id, 'read')}
-                        className="inline-flex items-center gap-1 text-xs font-semibold text-[#0E3B22] hover:underline pt-1"
                       >
-                        <Check className="w-3.5 h-3.5" aria-hidden="true" />
-                        <span>Mark as read</span>
+                        Toutes
                       </button>
+                      {(availableOrderYears.length > 0
+                        ? availableOrderYears
+                        : [String(new Date().getFullYear())]
+                      ).map((yr) => (
+                        <button
+                          key={yr}
+                          type="button"
+                          onClick={() => {
+                            setOrderYearFilter(yr);
+                            setOrderPage(1);
+                          }}
+                          className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-colors ${orderYearFilter === yr
+                            ? 'bg-[#0284C7] text-white shadow-xs'
+                            : 'text-[#7A98A8] hover:text-[#EEF6FA]'
+                            }`}
+                        >
+                          {yr}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-[#12222B] rounded-2xl border border-[#1E3444] overflow-hidden shadow-lg">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="bg-[#0E1A22] border-b border-[#1E3444] text-xs font-semibold text-[#7A98A8] uppercase tracking-wider">
+                          <th className="py-3.5 px-4 text-start">Commande</th>
+                          <th className="py-3.5 px-4 text-start">Client</th>
+                          <th className="py-3.5 px-4 text-start">Articles</th>
+                          <th className="py-3.5 px-4 text-start">Alerte Email</th>
+                          <th className="py-3.5 px-4 text-end">Total</th>
+                          <th className="py-3.5 px-4 text-start">Statut</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-[#1A2E3B] text-[#C5D9E5]">
+                        {paginatedOrders.length === 0 ? (
+                          <tr>
+                            <td colSpan={6} className="py-12 text-center text-sm text-[#7A98A8]">
+                              Aucune commande trouvée pour ces critères.
+                            </td>
+                          </tr>
+                        ) : (
+                          paginatedOrders.map((ord) => (
+                            <tr key={ord.id} className="align-top hover:bg-[#162833] transition-colors">
+                              <td className="py-3.5 px-4">
+                                <div className="font-mono text-xs font-semibold text-[#EEF6FA] tabular-nums">{ord.id}</div>
+                                <div className="text-xs text-[#7A98A8] mt-0.5">
+                                  {new Date(ord.created_at).toLocaleDateString()}
+                                </div>
+                              </td>
+                              <td className="py-3.5 px-4 space-y-0.5">
+                                <div className="font-semibold text-[#EEF6FA]">{ord.customer_name}</div>
+                                <div className="text-xs text-[#38BDF8] font-mono tabular-nums" dir="ltr">
+                                  {ord.customer_phone}
+                                </div>
+                                <div className="text-xs text-[#7A98A8]">
+                                  {ord.city} · {ord.address}
+                                </div>
+                              </td>
+                              <td className="py-3.5 px-4">
+                                <ul className="space-y-1 text-xs text-[#C5D9E5]">
+                                  {ord.items.map((it, idx) => (
+                                    <li key={idx}>
+                                      {it.quantity} × {it.name}
+                                      {it.variantLabel ? ` (${it.variantLabel})` : ''}
+                                    </li>
+                                  ))}
+                                </ul>
+                              </td>
+                              <td className="py-3.5 px-4 space-y-1">
+                                <span
+                                  className={`inline-block px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${ord.email_status === 'sent'
+                                    ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
+                                    : ord.email_status === 'failed'
+                                      ? 'bg-red-500/15 text-red-400 border-red-500/30'
+                                      : 'bg-amber-500/15 text-amber-400 border-amber-500/30'
+                                    }`}
+                                >
+                                  {ord.email_status === 'sent'
+                                    ? 'Envoyé'
+                                    : ord.email_status === 'failed'
+                                      ? 'Échoué'
+                                      : ord.email_status === 'pending_smtp'
+                                        ? 'En attente SMTP'
+                                        : 'En attente EmailJS'}
+                                </span>
+                                <div className="text-xs text-[#7A98A8] font-mono" dir="ltr">
+                                  {ord.email_recipient || 'domaineessaoudi@gmail.com'}
+                                </div>
+                              </td>
+                              <td className="py-3.5 px-4 text-end font-bold text-[#EEF6FA] tabular-nums">
+                                {formatMad(ord.total_mad, lang)}
+                              </td>
+                              <td className="py-3.5 px-4">
+                                <div className="flex items-center gap-2">
+                                  <select
+                                    value={ord.status}
+                                    aria-label={`Order status for ${ord.id}`}
+                                    onChange={(e) =>
+                                      handleOrderStatusChange(ord.id, e.target.value as OrderStatus)
+                                    }
+                                    className="px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-[#1E3444] bg-[#0B151C] text-white focus:outline-none"
+                                  >
+                                    <option value="pending">pending</option>
+                                    <option value="confirmed">confirmed</option>
+                                    <option value="preparing">preparing</option>
+                                    <option value="shipped">shipped</option>
+                                    <option value="completed">completed</option>
+                                    <option value="cancelled">cancelled</option>
+                                  </select>
+                                  <button
+                                    type="button"
+                                    aria-label={`Supprimer commande ${ord.id}`}
+                                    onClick={() => handleDeleteOrder(ord.id)}
+                                    className="p-1.5 rounded-lg border border-[#1E3444] bg-[#0B151C] hover:bg-red-950/40 text-red-400 transition-colors"
+                                  >
+                                    <Trash2 className="w-4 h-4" aria-hidden="true" />
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                {filteredOrders.length > 0 && (
+                  <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-5 py-3.5 bg-[#12222B] rounded-2xl border border-[#1E3444] shadow-md">
+                    <div className="text-xs text-[#7A98A8]">
+                      Affichage de{' '}
+                      <span className="font-semibold text-[#EEF6FA]">
+                        {(currentPage - 1) * ordersPerPage + 1}
+                      </span>{' '}
+                      à{' '}
+                      <span className="font-semibold text-[#EEF6FA]">
+                        {Math.min(currentPage * ordersPerPage, filteredOrders.length)}
+                      </span>{' '}
+                      sur <span className="font-semibold text-[#EEF6FA]">{filteredOrders.length}</span>{' '}
+                      commandes
+                    </div>
+
+                    {totalOrderPages > 1 && (
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => setOrderPage((p) => Math.max(1, p - 1))}
+                          disabled={currentPage === 1}
+                          aria-label="Page précédente"
+                          className="p-1.5 rounded-lg border border-[#1E3444] bg-[#0B151C] text-[#7A98A8] hover:text-[#EEF6FA] hover:bg-[#162833] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                        >
+                          <ChevronLeft className="w-4 h-4" />
+                        </button>
+
+                        <div className="flex items-center gap-1">
+                          {Array.from({ length: totalOrderPages }, (_, i) => i + 1).map((pg) => (
+                            <button
+                              key={pg}
+                              type="button"
+                              onClick={() => setOrderPage(pg)}
+                              className={`w-7 h-7 rounded-lg text-xs font-semibold border transition-colors ${currentPage === pg
+                                ? 'bg-[#0284C7] text-white border-[#0284C7]'
+                                : 'bg-[#0B151C] text-[#7A98A8] border-[#1E3444] hover:bg-[#162833] hover:text-[#EEF6FA]'
+                                }`}
+                            >
+                              {pg}
+                            </button>
+                          ))}
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => setOrderPage((p) => Math.min(totalOrderPages, p + 1))}
+                          disabled={currentPage === totalOrderPages}
+                          aria-label="Page suivante"
+                          className="p-1.5 rounded-lg border border-[#1E3444] bg-[#0B151C] text-[#7A98A8] hover:text-[#EEF6FA] hover:bg-[#162833] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                        >
+                          <ChevronRight className="w-4 h-4" />
+                        </button>
+                      </div>
                     )}
                   </div>
-                ))}
+                )}
               </div>
             )}
-          </div>
-        </div>
-      )}
 
-      {/* SQL EDITOR & SUPABASE TAB */}
-      {activeTab === 'sql' && <AdminSqlEditor adminToken={adminToken} showToast={showToast} />}
+            {/* CONTENT & INQUIRIES TAB */}
+            {activeTab === 'content' && contentForm && (
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                <form
+                  onSubmit={handleSaveSiteContent}
+                  className="lg:col-span-7 bg-[#12222B] rounded-2xl border border-[#1E3444] p-6 sm:p-7 space-y-6 shadow-lg"
+                >
+                  <h2 className="font-display text-lg font-semibold text-[#EEF6FA]">
+                    Contenu du Site &amp; Coordonnées
+                  </h2>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-xs font-medium text-[#8AA4B4] mb-1">
+                        Téléphone Domaine (+212)
+                      </label>
+                      <input
+                        type="text"
+                        dir="ltr"
+                        value={contentForm.phone}
+                        onChange={(e) =>
+                          setContentForm((prev) => (prev ? { ...prev, phone: e.target.value } : prev))
+                        }
+                        className="w-full px-3 py-2 text-sm rounded-lg border border-[#1E3444] bg-[#0B151C] text-white"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-[#8AA4B4] mb-1">
+                        WhatsApp (+212)
+                      </label>
+                      <input
+                        type="text"
+                        dir="ltr"
+                        value={contentForm.whatsapp}
+                        onChange={(e) =>
+                          setContentForm((prev) => (prev ? { ...prev, whatsapp: e.target.value } : prev))
+                        }
+                        className="w-full px-3 py-2 text-sm rounded-lg border border-[#1E3444] bg-[#0B151C] text-white"
+                      />
+                    </div>
+                    <div>
+                      <label
+                        htmlFor="admin-order-email"
+                        className="block text-xs font-medium text-[#8AA4B4] mb-1"
+                      >
+                        Email Réception Commandes
+                      </label>
+                      <input
+                        id="admin-order-email"
+                        type="email"
+                        dir="ltr"
+                        value={contentForm.email}
+                        onChange={(e) =>
+                          setContentForm((prev) => (prev ? { ...prev, email: e.target.value } : prev))
+                        }
+                        className="w-full px-3 py-2 text-sm rounded-lg border border-[#1E3444] bg-[#0B151C] text-white"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label
+                        htmlFor="admin-social-instagram"
+                        className="block text-xs font-medium text-[#8AA4B4] mb-1"
+                      >
+                        URL Instagram
+                      </label>
+                      <input
+                        id="admin-social-instagram"
+                        type="url"
+                        dir="ltr"
+                        placeholder="https://www.instagram.com/domaineessaoudi/"
+                        value={contentForm.socialInstagram || ''}
+                        onChange={(e) =>
+                          setContentForm((prev) =>
+                            prev ? { ...prev, socialInstagram: e.target.value } : prev
+                          )
+                        }
+                        className="w-full px-3 py-2 text-sm rounded-lg border border-[#1E3444] bg-[#0B151C] text-white"
+                      />
+                    </div>
+                    <div>
+                      <label
+                        htmlFor="admin-social-facebook"
+                        className="block text-xs font-medium text-[#8AA4B4] mb-1"
+                      >
+                        URL Facebook
+                      </label>
+                      <input
+                        id="admin-social-facebook"
+                        type="url"
+                        dir="ltr"
+                        placeholder="https://www.facebook.com/profile.php?id=61596964379987"
+                        value={contentForm.socialFacebook || ''}
+                        onChange={(e) =>
+                          setContentForm((prev) =>
+                            prev ? { ...prev, socialFacebook: e.target.value } : prev
+                          )
+                        }
+                        className="w-full px-3 py-2 text-sm rounded-lg border border-[#1E3444] bg-[#0B151C] text-white"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="rounded-xl border border-[#1E3444] bg-[#0B151C] p-4 sm:p-5 space-y-4">
+                    {(() => {
+                      const ej = resolveEmailJsConfig(contentForm);
+                      const isReady = ej.configured || Boolean(emailStatus?.configured);
+                      return (
+                        <>
+                          <div className="flex flex-wrap items-center justify-between gap-2">
+                            <div className="flex items-center gap-2 text-sm font-semibold text-[#EEF6FA]">
+                              <Mail className="w-4 h-4 text-sky-400" aria-hidden="true" />
+                              <span>EmailJS Commandes → {ej.recipientEmail}</span>
+                            </div>
+                            <span
+                              className={`px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${isReady
+                                ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
+                                : 'bg-amber-500/15 text-amber-400 border-amber-500/30'
+                                }`}
+                            >
+                              {ej.configured
+                                ? 'EmailJS Actif'
+                                : emailStatus?.smtpConfigured
+                                  ? 'SMTP Actif'
+                                  : 'Identifiants EmailJS requis'}
+                            </span>
+                          </div>
+
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            <div>
+                              <label
+                                htmlFor="admin-emailjs-service"
+                                className="block text-xs font-medium text-[#8AA4B4] mb-1"
+                              >
+                                EmailJS Service ID
+                              </label>
+                              <input
+                                id="admin-emailjs-service"
+                                type="text"
+                                dir="ltr"
+                                placeholder="service_xxxxxxx"
+                                value={contentForm.emailjsServiceId || ''}
+                                onChange={(e) =>
+                                  setContentForm((prev) =>
+                                    prev ? { ...prev, emailjsServiceId: e.target.value } : prev
+                                  )
+                                }
+                                className="w-full px-3 py-2 text-xs font-mono rounded-lg border border-[#1E3444] bg-[#12222B] text-white"
+                              />
+                            </div>
+                            <div>
+                              <label
+                                htmlFor="admin-emailjs-template"
+                                className="block text-xs font-medium text-[#8AA4B4] mb-1"
+                              >
+                                EmailJS Template ID
+                              </label>
+                              <input
+                                id="admin-emailjs-template"
+                                type="text"
+                                dir="ltr"
+                                placeholder="template_xxxxxxx"
+                                value={contentForm.emailjsTemplateId || ''}
+                                onChange={(e) =>
+                                  setContentForm((prev) =>
+                                    prev ? { ...prev, emailjsTemplateId: e.target.value } : prev
+                                  )
+                                }
+                                className="w-full px-3 py-2 text-xs font-mono rounded-lg border border-[#1E3444] bg-[#12222B] text-white"
+                              />
+                            </div>
+                            <div>
+                              <label
+                                htmlFor="admin-emailjs-key"
+                                className="block text-xs font-medium text-[#8AA4B4] mb-1"
+                              >
+                                EmailJS Public Key
+                              </label>
+                              <input
+                                id="admin-emailjs-key"
+                                type="text"
+                                dir="ltr"
+                                placeholder="Public Key"
+                                value={contentForm.emailjsPublicKey || ''}
+                                onChange={(e) =>
+                                  setContentForm((prev) =>
+                                    prev ? { ...prev, emailjsPublicKey: e.target.value } : prev
+                                  )
+                                }
+                                className="w-full px-3 py-2 text-xs font-mono rounded-lg border border-[#1E3444] bg-[#12222B] text-white"
+                              />
+                            </div>
+                          </div>
+
+                          <p className="text-xs text-[#7A98A8] leading-relaxed">
+                            Variables envoyées au template EmailJS :{' '}
+                            <code className="text-[#38BDF8]">
+                              {'{{to_email}}, {{order_id}}, {{customer_name}}, {{customer_phone}}, {{city}}, {{address}}, {{items_summary}}, {{total_mad}}, {{message}}'}
+                            </code>
+                          </p>
+
+                          <div className="flex flex-wrap items-center gap-3">
+                            <button
+                              type="button"
+                              disabled={sendingTestEmail}
+                              onClick={handleSendTestEmail}
+                              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg border border-[#1E3444] bg-[#12222B] text-[#EEF6FA] hover:bg-[#162833] disabled:opacity-60 text-xs font-semibold transition-colors"
+                            >
+                              <Send className="w-3.5 h-3.5 text-sky-400" aria-hidden="true" />
+                              <span>
+                                {sendingTestEmail ? t.common.loading : 'Tester l’envoi EmailJS'}
+                              </span>
+                            </button>
+                            {testEmailResult && (
+                              <span
+                                className={`text-xs font-medium ${testEmailResult.sent ? 'text-emerald-400' : 'text-amber-400'
+                                  }`}
+                              >
+                                {testEmailResult.sent
+                                  ? `Envoyé via EmailJS à ${testEmailResult.recipient}`
+                                  : testEmailResult.error || `Échec d’envoi pour ${testEmailResult.recipient}`}
+                              </span>
+                            )}
+                          </div>
+                        </>
+                      );
+                    })()}
+                  </div>
+
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-xs font-medium text-[#8AA4B4] mb-1">
+                        Titre Hero (FR)
+                      </label>
+                      <input
+                        type="text"
+                        value={contentForm.heroTitle_fr}
+                        onChange={(e) =>
+                          setContentForm((prev) =>
+                            prev ? { ...prev, heroTitle_fr: e.target.value } : prev
+                          )
+                        }
+                        className="w-full px-3 py-2 text-sm rounded-lg border border-[#1E3444] bg-[#0B151C] text-white"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-[#8AA4B4] mb-1">
+                        Titre Hero (EN)
+                      </label>
+                      <input
+                        type="text"
+                        value={contentForm.heroTitle_en}
+                        onChange={(e) =>
+                          setContentForm((prev) =>
+                            prev ? { ...prev, heroTitle_en: e.target.value } : prev
+                          )
+                        }
+                        className="w-full px-3 py-2 text-sm rounded-lg border border-[#1E3444] bg-[#0B151C] text-white"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-[#8AA4B4] mb-1">
+                        العنوان الرئيسي (AR)
+                      </label>
+                      <input
+                        type="text"
+                        dir="rtl"
+                        value={contentForm.heroTitle_ar}
+                        onChange={(e) =>
+                          setContentForm((prev) =>
+                            prev ? { ...prev, heroTitle_ar: e.target.value } : prev
+                          )
+                        }
+                        className="w-full px-3 py-2 text-sm rounded-lg border border-[#1E3444] bg-[#0B151C] text-white"
+                      />
+                    </div>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={savingContent}
+                    className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#0284C7] to-[#0369A1] hover:from-[#0369A1] hover:to-[#075985] text-white text-sm font-semibold shadow-md shadow-sky-500/20"
+                  >
+                    {savingContent ? t.common.loading : t.common.save}
+                  </button>
+                </form>
+
+                <div className="lg:col-span-5 bg-[#12222B] rounded-2xl border border-[#1E3444] p-6 space-y-4 shadow-lg">
+                  <h2 className="font-display text-lg font-semibold text-[#EEF6FA]">
+                    Messages &amp; Contact ({messages.length})
+                  </h2>
+                  {messages.length === 0 ? (
+                    <p className="text-sm text-[#7A98A8]">Aucun message pour le moment.</p>
+                  ) : (
+                    <div className="divide-y divide-[#1A2E3B] space-y-3">
+                      {messages.map((m) => (
+                        <div key={m.id} className="pt-3 first:pt-0 space-y-1.5">
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="font-semibold text-sm text-[#EEF6FA]">{m.name}</span>
+                            <span className="text-xs font-mono text-[#38BDF8]">{m.status}</span>
+                          </div>
+                          <div className="text-xs text-[#7A98A8] font-mono" dir="ltr">
+                            {m.phone}
+                          </div>
+                          <div className="text-xs font-semibold text-[#C5D9E5]">{m.subject}</div>
+                          <p className="text-xs text-[#7A98A8] leading-relaxed">{m.message}</p>
+                          {m.status === 'unread' && (
+                            <button
+                              type="button"
+                              onClick={() => handleMessageStatus(m.id, 'read')}
+                              className="inline-flex items-center gap-1 text-xs font-semibold text-[#38BDF8] hover:underline pt-1"
+                            >
+                              <Check className="w-3.5 h-3.5" aria-hidden="true" />
+                              <span>Marquer comme lu</span>
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* SQL EDITOR & SUPABASE TAB */}
+            {activeTab === 'sql' && <AdminSqlEditor adminToken={adminToken} showToast={showToast} />}
           </main>
         </div>
       </div>

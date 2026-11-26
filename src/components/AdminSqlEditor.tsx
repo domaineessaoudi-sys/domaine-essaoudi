@@ -269,17 +269,17 @@ export function AdminSqlEditor({ adminToken, showToast }: AdminSqlEditorProps) {
   return (
     <div className="space-y-8">
       {/* Supabase Connection Card */}
-      <div className="bg-white rounded-xl border border-[#DCE8DF] p-6 space-y-5">
-        <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-[#DCE8DF]">
+      <div className="bg-[#12222B] rounded-2xl border border-[#1E3444] p-6 sm:p-7 space-y-6 shadow-lg">
+        <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-[#1E3444]">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-[#0E3B22]/10 text-[#0E3B22] flex items-center justify-center shrink-0">
+            <div className="w-10 h-10 rounded-xl bg-sky-500/10 text-sky-400 flex items-center justify-center shrink-0 border border-sky-500/20">
               <Database className="w-5 h-5" aria-hidden="true" />
             </div>
             <div>
-              <h2 className="font-display text-lg font-semibold text-[#0F2418]">
+              <h2 className="font-display text-lg font-semibold text-[#EEF6FA]">
                 Base de Données Dynamique Supabase (PostgreSQL &amp; REST)
               </h2>
-              <p className="text-xs text-[#516358]">
+              <p className="text-xs text-[#7A98A8]">
                 Toutes les données du domaine (produits, commandes, messages et contenu) sont
                 connectées à votre projet Supabase.
               </p>
@@ -287,12 +287,12 @@ export function AdminSqlEditor({ adminToken, showToast }: AdminSqlEditorProps) {
           </div>
 
           <span
-            className={`px-3 py-1 rounded-lg text-xs font-semibold ${
+            className={`px-3 py-1 rounded-full text-xs font-semibold border ${
               status?.connectedMode === 'postgres'
-                ? 'bg-emerald-100 text-emerald-900'
+                ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
                 : status?.connectedMode === 'rest'
-                  ? 'bg-sky-100 text-sky-900'
-                  : 'bg-amber-100 text-amber-900'
+                  ? 'bg-sky-500/15 text-sky-400 border-sky-500/30'
+                  : 'bg-amber-500/15 text-amber-400 border-amber-500/30'
             }`}
           >
             {status?.connectedMode === 'postgres'
@@ -308,7 +308,7 @@ export function AdminSqlEditor({ adminToken, showToast }: AdminSqlEditorProps) {
             <div>
               <label
                 htmlFor="supabase-project-url"
-                className="block text-xs font-medium text-[#4A5D52] mb-1"
+                className="block text-xs font-medium text-[#8AA4B4] mb-1"
               >
                 Supabase Project URL
               </label>
@@ -319,14 +319,14 @@ export function AdminSqlEditor({ adminToken, showToast }: AdminSqlEditorProps) {
                 value={projectUrl}
                 onChange={(e) => setProjectUrl(e.target.value)}
                 placeholder="https://dfqyzoxomnqnkfhtyfti.supabase.co"
-                className="w-full px-3.5 py-2.5 text-xs font-mono rounded-lg border border-[#DCE8DF] bg-[#F7FAF7]"
+                className="w-full px-3.5 py-2.5 text-xs font-mono rounded-lg border border-[#1E3444] bg-[#0B151C] text-white"
               />
             </div>
 
             <div>
               <label
                 htmlFor="supabase-postgres-uri"
-                className="block text-xs font-medium text-[#4A5D52] mb-1"
+                className="block text-xs font-medium text-[#8AA4B4] mb-1"
               >
                 Supabase Postgres Connection URI (Session Pooler pour SQL Editor &amp; Sync)
               </label>
@@ -342,19 +342,18 @@ export function AdminSqlEditor({ adminToken, showToast }: AdminSqlEditorProps) {
                     ? `Enregistrée : ${status.postgresUriMasked}`
                     : 'postgresql://postgres.ref:MOT_DE_PASSE@aws-0-eu-central-1.pooler.supabase.com:5432/postgres'
                 }
-                className="w-full px-3.5 py-2.5 text-xs font-mono rounded-lg border border-[#DCE8DF] bg-[#F7FAF7]"
+                className="w-full px-3.5 py-2.5 text-xs font-mono rounded-lg border border-[#1E3444] bg-[#0B151C] text-white"
               />
-              <p className="text-[11px] text-[#516358] mt-1">
-                Remplacez <code className="font-mono">[YOUR-DATABASE-PASSWORD]</code> par votre mot
-                de passe (préférez l’URI <strong>Session Pooler</strong> IPv4 dans Supabase →
-                Connect).
+              <p className="text-[11px] text-[#7A98A8] mt-1">
+                Remplacez <code className="font-mono text-[#38BDF8]">[YOUR-DATABASE-PASSWORD]</code> par votre mot
+                de passe (Session Pooler IPv4 dans Supabase → Connect).
               </p>
             </div>
 
             <div>
               <label
                 htmlFor="supabase-anon-key"
-                className="block text-xs font-medium text-[#4A5D52] mb-1"
+                className="block text-xs font-medium text-[#8AA4B4] mb-1"
               >
                 Supabase Publishable / Anon Key
               </label>
@@ -370,14 +369,14 @@ export function AdminSqlEditor({ adminToken, showToast }: AdminSqlEditorProps) {
                     ? `Enregistrée : ${status.anonKeyMasked}`
                     : 'sb_publishable_... / eyJ...'
                 }
-                className="w-full px-3.5 py-2.5 text-xs font-mono rounded-lg border border-[#DCE8DF] bg-[#F7FAF7]"
+                className="w-full px-3.5 py-2.5 text-xs font-mono rounded-lg border border-[#1E3444] bg-[#0B151C] text-white"
               />
             </div>
 
             <div>
               <label
                 htmlFor="supabase-service-key"
-                className="block text-xs font-medium text-[#4A5D52] mb-1"
+                className="block text-xs font-medium text-[#8AA4B4] mb-1"
               >
                 Supabase Secret / Service Role Key (écriture serveur sans blocage RLS)
               </label>
@@ -393,17 +392,17 @@ export function AdminSqlEditor({ adminToken, showToast }: AdminSqlEditorProps) {
                     ? `Enregistrée : ${status.serviceRoleKeyMasked}`
                     : 'sb_secret_... / eyJ...'
                 }
-                className="w-full px-3.5 py-2.5 text-xs font-mono rounded-lg border border-[#DCE8DF] bg-[#F7FAF7]"
+                className="w-full px-3.5 py-2.5 text-xs font-mono rounded-lg border border-[#1E3444] bg-[#0B151C] text-white"
               />
             </div>
           </div>
 
           {connectionFeedback && (
             <div
-              className={`p-3 rounded-lg text-xs font-medium ${
+              className={`p-3 rounded-lg text-xs font-medium border ${
                 connectionFeedback.ok
-                  ? 'bg-emerald-50 text-emerald-900 border border-emerald-200'
-                  : 'bg-[#FEE2E2] text-[#991B1B] border border-red-200'
+                  ? 'bg-emerald-950/60 text-emerald-300 border-emerald-800'
+                  : 'bg-red-950/60 text-red-200 border-red-800'
               }`}
             >
               {connectionFeedback.message}
@@ -414,7 +413,7 @@ export function AdminSqlEditor({ adminToken, showToast }: AdminSqlEditorProps) {
             <button
               type="submit"
               disabled={savingConfig}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[#0E3B22] hover:bg-[#082716] disabled:opacity-60 text-white text-xs font-semibold transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#0284C7] to-[#0369A1] hover:from-[#0369A1] hover:to-[#075985] text-white text-xs font-semibold shadow-md shadow-sky-500/20 transition-all hover:scale-[1.02]"
             >
               <Check className="w-4 h-4" aria-hidden="true" />
               <span>{savingConfig ? 'Enregistrement…' : 'Enregistrer la connexion'}</span>
@@ -424,7 +423,7 @@ export function AdminSqlEditor({ adminToken, showToast }: AdminSqlEditorProps) {
               type="button"
               disabled={testingConn}
               onClick={handleTestConnection}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border border-[#0E3B22] text-[#0E3B22] hover:bg-[#0E3B22]/5 disabled:opacity-60 text-xs font-semibold transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[#1E3444] bg-[#0B151C] text-[#EEF6FA] hover:bg-[#162833] disabled:opacity-60 text-xs font-semibold transition-colors"
             >
               <RefreshCw
                 className={`w-4 h-4 ${testingConn ? 'animate-spin' : ''}`}
@@ -437,9 +436,9 @@ export function AdminSqlEditor({ adminToken, showToast }: AdminSqlEditorProps) {
               type="button"
               disabled={syncingData}
               onClick={handleSyncToSupabase}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border border-[#DCE8DF] bg-[#EDF4EE] hover:bg-[#DCE8DF] disabled:opacity-60 text-[#0F2418] text-xs font-semibold transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[#00C9A7]/40 bg-[#00C9A7]/10 hover:bg-[#00C9A7]/20 disabled:opacity-60 text-[#00C9A7] text-xs font-semibold transition-colors"
             >
-              <UploadCloud className="w-4 h-4 text-[#0E3B22]" aria-hidden="true" />
+              <UploadCloud className="w-4 h-4" aria-hidden="true" />
               <span>
                 {syncingData
                   ? 'Synchronisation…'
@@ -451,7 +450,7 @@ export function AdminSqlEditor({ adminToken, showToast }: AdminSqlEditorProps) {
               <button
                 type="button"
                 onClick={handleDisconnect}
-                className="inline-flex items-center gap-1.5 px-3 py-2.5 rounded-lg border border-red-200 text-[#9E2A2B] hover:bg-red-50 text-xs font-semibold transition-colors ms-auto"
+                className="inline-flex items-center gap-1.5 px-3 py-2.5 rounded-xl border border-red-800/40 bg-red-950/20 text-red-400 hover:bg-red-950/40 text-xs font-semibold transition-colors ms-auto"
               >
                 <Trash2 className="w-3.5 h-3.5" aria-hidden="true" />
                 <span>Déconnecter</span>
@@ -462,22 +461,22 @@ export function AdminSqlEditor({ adminToken, showToast }: AdminSqlEditorProps) {
       </div>
 
       {/* Interactive Supabase SQL Editor */}
-      <div className="bg-white rounded-xl border border-[#DCE8DF] p-6 space-y-5">
+      <div className="bg-[#12222B] rounded-2xl border border-[#1E3444] p-6 sm:p-7 space-y-6 shadow-lg">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-2.5">
-            <Terminal className="w-5 h-5 text-[#0E3B22]" aria-hidden="true" />
+            <Terminal className="w-5 h-5 text-sky-400" aria-hidden="true" />
             <div>
-              <h2 className="font-display text-lg font-semibold text-[#0F2418]">
+              <h2 className="font-display text-lg font-semibold text-[#EEF6FA]">
                 SQL Editor — Supabase PostgreSQL
               </h2>
-              <p className="text-xs text-[#516358]">
+              <p className="text-xs text-[#7A98A8]">
                 Exécutez vos requêtes SQL directement sur Supabase PostgreSQL (via Session Pooler
                 URI) ou copiez le script complet dans votre Supabase SQL Editor.
               </p>
             </div>
           </div>
 
-          <span className="px-3 py-1.5 rounded-lg border border-[#DCE8DF] bg-[#F7FAF7] text-xs font-semibold text-[#0F2418]">
+          <span className="px-3 py-1.5 rounded-xl border border-[#1E3444] bg-[#0B151C] text-xs font-semibold text-[#EEF6FA]">
             Cible : Supabase PostgreSQL {status?.hasPostgresUri ? '(Prêt)' : '(URI requise)'}
           </span>
         </div>
@@ -492,7 +491,7 @@ export function AdminSqlEditor({ adminToken, showToast }: AdminSqlEditorProps) {
                 setSqlQuery(preset.sql);
                 setSqlError(null);
               }}
-              className="px-3 py-1.5 rounded-lg border border-[#DCE8DF] bg-[#F7FAF7] hover:bg-[#EDF4EE] text-xs font-medium text-[#0F2418] transition-colors"
+              className="px-3 py-1.5 rounded-xl border border-[#1E3444] bg-[#0B151C] hover:bg-[#162833] text-xs font-medium text-[#EEF6FA] transition-colors"
             >
               {preset.label}
             </button>
@@ -518,7 +517,7 @@ export function AdminSqlEditor({ adminToken, showToast }: AdminSqlEditorProps) {
               }
             }}
             placeholder="SELECT id, name_fr, price_mad, stock FROM public.products;"
-            className="w-full p-4 rounded-xl border border-[#DCE8DF] bg-[#0F2418] text-[#EDF4EE] font-mono text-xs leading-relaxed focus:outline-none focus:ring-2 focus:ring-[#0E3B22]"
+            className="w-full p-4 rounded-xl border border-[#1E3444] bg-[#070E13] text-[#67D4F8] font-mono text-xs leading-relaxed focus:outline-none focus:ring-2 focus:ring-sky-500"
           />
 
           <div className="flex flex-wrap items-center justify-between gap-3">
@@ -527,7 +526,7 @@ export function AdminSqlEditor({ adminToken, showToast }: AdminSqlEditorProps) {
                 type="button"
                 disabled={executingSql}
                 onClick={handleRunSql}
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[#0E3B22] hover:bg-[#082716] disabled:opacity-60 text-white text-xs font-semibold transition-colors"
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#0284C7] to-[#0369A1] hover:from-[#0369A1] hover:to-[#075985] text-white text-xs font-semibold shadow-md shadow-sky-500/20 transition-all hover:scale-[1.02]"
               >
                 <Play className="w-3.5 h-3.5" aria-hidden="true" />
                 <span>{executingSql ? 'Exécution…' : 'Exécuter sur Supabase (Ctrl+Entrée)'}</span>
@@ -536,7 +535,7 @@ export function AdminSqlEditor({ adminToken, showToast }: AdminSqlEditorProps) {
               <button
                 type="button"
                 onClick={() => handleCopySql(sqlQuery)}
-                className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-lg border border-[#DCE8DF] bg-white hover:bg-[#EDF4EE] text-xs font-semibold text-[#0F2418] transition-colors"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-[#1E3444] bg-[#0B151C] hover:bg-[#162833] text-xs font-semibold text-[#EEF6FA] transition-colors"
               >
                 <Copy className="w-3.5 h-3.5" aria-hidden="true" />
                 <span>Copier cette requête</span>
@@ -545,7 +544,7 @@ export function AdminSqlEditor({ adminToken, showToast }: AdminSqlEditorProps) {
               <button
                 type="button"
                 onClick={handleLoadFullSupabaseSql}
-                className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-lg border border-[#0E3B22] bg-[#EDF4EE] hover:bg-[#DCE8DF] text-xs font-semibold text-[#0E3B22] transition-colors"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-[#00C9A7]/40 bg-[#00C9A7]/10 hover:bg-[#00C9A7]/20 text-xs font-semibold text-[#00C9A7] transition-colors"
               >
                 <Database className="w-3.5 h-3.5" aria-hidden="true" />
                 <span>SQL Complet Supabase (Tables + Permissions + Produits réels)</span>
@@ -554,10 +553,10 @@ export function AdminSqlEditor({ adminToken, showToast }: AdminSqlEditorProps) {
               <button
                 type="button"
                 onClick={() => handleCopySql(SUPABASE_SCHEMA_SQL)}
-                className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-lg border border-[#DCE8DF] bg-white hover:bg-[#EDF4EE] text-xs font-semibold text-[#0E3B22] transition-colors"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-[#1E3444] bg-[#0B151C] hover:bg-[#162833] text-xs font-semibold text-[#EEF6FA] transition-colors"
               >
                 {copiedSchema ? (
-                  <Check className="w-3.5 h-3.5" aria-hidden="true" />
+                  <Check className="w-3.5 h-3.5 text-emerald-400" aria-hidden="true" />
                 ) : (
                   <Copy className="w-3.5 h-3.5" aria-hidden="true" />
                 )}
@@ -566,7 +565,7 @@ export function AdminSqlEditor({ adminToken, showToast }: AdminSqlEditorProps) {
             </div>
 
             {sqlResult && (
-              <span className="text-xs font-mono text-[#516358]" dir="ltr">
+              <span className="text-xs font-mono text-[#7A98A8]" dir="ltr">
                 SUPABASE · {sqlResult.command} · {sqlResult.rowCount} ligne(s) ·{' '}
                 {sqlResult.durationMs} ms
               </span>
@@ -576,55 +575,57 @@ export function AdminSqlEditor({ adminToken, showToast }: AdminSqlEditorProps) {
 
         {/* Error Box */}
         {sqlError && (
-          <div className="p-3.5 rounded-lg bg-[#FEE2E2] text-[#991B1B] border border-red-200 text-xs font-mono whitespace-pre-wrap">
+          <div className="p-3.5 rounded-xl bg-red-950/60 text-red-200 border border-red-800 text-xs font-mono whitespace-pre-wrap">
             {sqlError}
           </div>
         )}
 
         {/* Result Grid */}
         {sqlResult && (
-          <div className="rounded-xl border border-[#DCE8DF] overflow-x-auto">
-            {sqlResult.rows.length === 0 ? (
-              <div className="p-6 text-center text-xs text-[#516358]">
-                Requête exécutée ({sqlResult.command}) — 0 ligne retournée en {sqlResult.durationMs}{' '}
-                ms.
-              </div>
-            ) : (
-              <table className="w-full text-xs text-start" dir="ltr">
-                <thead>
-                  <tr className="bg-[#EDF4EE] border-b border-[#DCE8DF] text-[#0F2418]">
-                    {sqlResult.columns.map((col) => (
-                      <th key={col} className="py-2.5 px-3 font-mono font-semibold text-start">
-                        {col}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[#DCE8DF]/70">
-                  {sqlResult.rows.map((row, rIdx) => (
-                    <tr key={rIdx} className="hover:bg-[#F7FAF7]">
-                      {sqlResult.columns.map((col) => {
-                        const val = row[col];
-                        const formatted = formatCellValue(val);
-                        return (
-                          <td
-                            key={col}
-                            className={`py-2 px-3 font-mono max-w-xs truncate ${
-                              val === null || val === undefined
-                                ? 'text-[#516358]/60 italic'
-                                : 'text-[#0F2418]'
-                            }`}
-                            title={formatted}
-                          >
-                            {formatted}
-                          </td>
-                        );
-                      })}
+          <div className="rounded-xl border border-[#1E3444] overflow-hidden bg-[#0B151C]">
+            <div className="overflow-x-auto">
+              {sqlResult.rows.length === 0 ? (
+                <div className="p-6 text-center text-xs text-[#7A98A8]">
+                  Requête exécutée ({sqlResult.command}) — 0 ligne retournée en {sqlResult.durationMs}{' '}
+                  ms.
+                </div>
+              ) : (
+                <table className="w-full text-xs text-start" dir="ltr">
+                  <thead>
+                    <tr className="bg-[#0E1A22] border-b border-[#1E3444] text-[#7A98A8]">
+                      {sqlResult.columns.map((col) => (
+                        <th key={col} className="py-2.5 px-3 font-mono font-semibold text-start">
+                          {col}
+                        </th>
+                      ))}
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
+                  </thead>
+                  <tbody className="divide-y divide-[#1A2E3B] text-[#C5D9E5]">
+                    {sqlResult.rows.map((row, rIdx) => (
+                      <tr key={rIdx} className="hover:bg-[#162833] transition-colors">
+                        {sqlResult.columns.map((col) => {
+                          const val = row[col];
+                          const formatted = formatCellValue(val);
+                          return (
+                            <td
+                              key={col}
+                              className={`py-2 px-3 font-mono max-w-xs truncate ${
+                                val === null || val === undefined
+                                  ? 'text-[#7A98A8]/60 italic'
+                                  : 'text-[#EEF6FA]'
+                              }`}
+                              title={formatted}
+                            >
+                              {formatted}
+                            </td>
+                          );
+                        })}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
           </div>
         )}
       </div>
