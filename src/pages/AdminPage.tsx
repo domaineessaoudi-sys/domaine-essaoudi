@@ -1127,7 +1127,7 @@ export function AdminPage() {
         {/* Body Section: Left Pill Sidebar (full-height) + Scrollable Main Content */}
         <div className="flex flex-col md:flex-row flex-1 overflow-hidden gap-0">
           {/* Left Vertical Pill Sidebar */}
-          <aside className="w-full md:w-28 md:h-full bg-[#12222B] md:rounded-none md:rounded-bl-[32px] border-b md:border-b-0 md:border-r border-[#1E3444] p-2 sm:p-3 md:py-8 md:px-4 flex flex-row md:flex-col items-center justify-between md:justify-start gap-2 md:gap-6 shrink-0 shadow-lg z-30">
+          <aside className="w-full md:w-28 md:h-full bg-[#12222B] md:rounded-none md:rounded-bl-[32px] border-b md:border-b-0 md:border-r border-[#1E3444] p-2 sm:p-3 md:py-8 md:px-4 flex flex-row md:flex-col items-center justify-between md:justify-start gap-2 md:gap-6 shrink-0 shadow-lg z-30 overflow-x-auto md:overflow-y-auto no-scrollbar">
             {(
               [
                 { key: 'overview', label: 'Dashboard', icon: LayoutDashboard },
@@ -1165,7 +1165,7 @@ export function AdminPage() {
           </aside>
 
           {/* Right Main Working Area — only this scrolls */}
-          <main className="flex-1 w-full min-w-0 overflow-y-auto p-4 sm:p-6 lg:p-8 space-y-6">
+          <main className="flex-1 w-full min-w-0 overflow-y-auto p-4 sm:p-6 lg:p-8 space-y-6 scroll-smooth">
             {adminDbError && activeTab !== 'sql' && (
               <div className="rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3 flex flex-wrap items-center justify-between gap-3 text-xs text-red-300">
                 <span>{adminDbError}</span>

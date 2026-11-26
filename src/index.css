@@ -110,6 +110,50 @@
   color: #557182 !important;
 }
 
+/* ==========================================================================
+   Backoffice Sleek Custom Scrollbar
+   ========================================================================== */
+.admin-theme,
+.admin-theme * {
+  scrollbar-width: thin;
+  scrollbar-color: #1E394A transparent;
+}
+
+.admin-theme ::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+
+.admin-theme ::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.admin-theme ::-webkit-scrollbar-thumb {
+  background: #182F3E;
+  border-radius: 9999px;
+  border: 1px solid rgba(2, 132, 199, 0.2);
+  transition: all 0.2s ease;
+}
+
+.admin-theme ::-webkit-scrollbar-thumb:hover {
+  background: #0284C7;
+  border-color: #38BDF8;
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.45);
+}
+
+.admin-theme ::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Hide scrollbar for clean horizontal tabs or pills if needed */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 .admin-theme .hover\:bg-\[\#EDF4EE\]:hover,
 .admin-theme .hover\:bg-\[\#F2F7F4\]:hover,
 .admin-theme .hover\:bg-\[\#F3F8FB\]:hover,
