@@ -897,7 +897,14 @@ app.post('/api/admin/users', requireAdmin, async (req, res) => {
     const user = Array.isArray(inserted) ? inserted[0] : inserted;
     res.json({ user });
   } catch (err) {
-    res.status(400).json({ error: err instanceof Error ? err.message : 'Erreur création utilisateur.' });
+    const rawMsg = err instanceof Error ? err.message : 'Erreur création utilisateur.';
+    if (rawMsg.includes('admin_auth_id_check')) {
+      res.status(400).json({
+        error: "La table Supabase 'admin_auth' contient une contrainte limitant à un seul administrateur. Exécutez dans Supabase SQL Editor : ALTER TABLE admin_auth DROP CONSTRAINT IF EXISTS admin_auth_id_check;",
+      });
+      return;
+    }
+    res.status(400).json({ error: rawMsg });
   }
 });
 

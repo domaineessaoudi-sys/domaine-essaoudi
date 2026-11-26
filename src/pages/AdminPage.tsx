@@ -2643,8 +2643,31 @@ export function AdminPage() {
 
                 {/* Error banner */}
                 {usersError && (
-                  <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
-                    {usersError}
+                  <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-300 space-y-2">
+                    <p className="font-semibold">{usersError}</p>
+                    {usersError.includes('admin_auth_id_check') && (
+                      <div className="pt-2 border-t border-red-500/20">
+                        <p className="text-xs text-red-200 mb-2">
+                          Votre table <code className="text-sky-300">admin_auth</code> a été configurée pour n'accepter qu'un seul utilisateur (<code className="text-sky-300">CHECK (id = 1)</code>).
+                          Pour autoriser plusieurs administrateurs, copiez et exécutez cette commande dans votre <strong>Supabase SQL Editor</strong> :
+                        </p>
+                        <div className="flex items-center gap-2">
+                          <code className="flex-1 px-3 py-1.5 rounded-lg bg-[#070E13] border border-red-500/30 font-mono text-xs text-emerald-400 select-all">
+                            ALTER TABLE admin_auth DROP CONSTRAINT IF EXISTS admin_auth_id_check;
+                          </code>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              navigator.clipboard.writeText('ALTER TABLE admin_auth DROP CONSTRAINT IF EXISTS admin_auth_id_check;');
+                              showToast('Commande SQL copiée !');
+                            }}
+                            className="px-3 py-1.5 rounded-lg bg-red-600/30 hover:bg-red-600/50 border border-red-500/40 text-xs text-white font-medium transition-colors shrink-0"
+                          >
+                            Copier SQL
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -2808,9 +2831,13 @@ export function AdminPage() {
 
                 {/* SQL hint */}
                 <div className="rounded-xl border border-[#1E3444]/60 bg-[#0B151C]/60 p-4 text-xs text-[#4A6878]">
-                  <p className="font-semibold text-[#7A98A8] mb-1">💡 Migration automatique</p>
-                  <p className="text-[#4A6878] mb-2">Les colonnes <code className="text-sky-400">username</code>, <code className="text-sky-400">email</code>, <code className="text-sky-400">role</code>, <code className="text-sky-400">created_at</code> sont ajoutées automatiquement à votre table existante <code className="text-sky-400">admin_auth</code>. Si besoin, copiez ce script dans le SQL Editor Supabase :</p>
-                  <pre className="font-mono text-[11px] text-[#38BDF8]/70 whitespace-pre-wrap leading-relaxed">{`ALTER TABLE admin_auth
+                  <p className="font-semibold text-[#7A98A8] mb-1">💡 Configuration Supabase requise</p>
+                  <p className="text-[#4A6878] mb-2">Si votre table existante <code className="text-sky-400">admin_auth</code> bloque l'ajout avec la contrainte <code className="text-amber-400">admin_auth_id_check</code>, exécutez ce script dans votre <strong>Supabase SQL Editor</strong> :</p>
+                  <pre className="font-mono text-[11px] text-[#38BDF8]/90 whitespace-pre-wrap leading-relaxed bg-[#070E13] p-3 rounded-lg border border-[#1E3444]">{`-- 1. Débloquer la table pour plusieurs utilisateurs (supprimer le verrou id = 1) :
+ALTER TABLE admin_auth DROP CONSTRAINT IF EXISTS admin_auth_id_check;
+
+-- 2. Ajouter les colonnes utilisateurs si non présentes :
+ALTER TABLE admin_auth
   ADD COLUMN IF NOT EXISTS username TEXT,
   ADD COLUMN IF NOT EXISTS email TEXT,
   ADD COLUMN IF NOT EXISTS role TEXT NOT NULL DEFAULT 'admin',

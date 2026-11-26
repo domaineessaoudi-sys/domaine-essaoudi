@@ -2930,7 +2930,14 @@ app.post("/api/admin/users", requireAdmin, async (req, res) => {
     const user = Array.isArray(inserted) ? inserted[0] : inserted;
     res.json({ user });
   } catch (err) {
-    res.status(400).json({ error: err instanceof Error ? err.message : "Erreur cr\xE9ation utilisateur." });
+    const rawMsg = err instanceof Error ? err.message : "Erreur cr\xE9ation utilisateur.";
+    if (rawMsg.includes("admin_auth_id_check")) {
+      res.status(400).json({
+        error: "La table Supabase 'admin_auth' contient une contrainte limitant \xE0 un seul administrateur. Ex\xE9cutez dans Supabase SQL Editor : ALTER TABLE admin_auth DROP CONSTRAINT IF EXISTS admin_auth_id_check;"
+      });
+      return;
+    }
+    res.status(400).json({ error: rawMsg });
   }
 });
 app.patch("/api/admin/users/:id", requireAdmin, async (req, res) => {
