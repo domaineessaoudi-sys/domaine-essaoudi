@@ -15,6 +15,7 @@ import { AdminPage } from './pages/AdminPage';
 function AppShell() {
   const { route, toastMessage } = useApp();
   const [mapsQuotaExceeded, setMapsQuotaExceeded] = useState(false);
+  const isAdmin = route === '/admin';
 
   useEffect(() => {
     const onQuota = () => setMapsQuotaExceeded(true);
@@ -38,8 +39,8 @@ function AppShell() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#F7FAF7] text-[#0F2418]">
-      {mapsQuotaExceeded && (
+    <div className={`min-h-screen flex flex-col ${isAdmin ? '' : 'bg-[#F7FAF7] text-[#0F2418]'}`}>
+      {mapsQuotaExceeded && !isAdmin && (
         <div className="bg-amber-50 border-b border-amber-200 text-amber-900 px-4 py-2.5 text-xs md:text-sm text-center sticky top-0 z-50 shadow-sm">
           <span>
             Google Maps Platform quota reached. If you are the app owner, visit{' '}
@@ -56,12 +57,12 @@ function AppShell() {
         </div>
       )}
 
-      <Navbar />
+      {!isAdmin && <Navbar />}
 
       <main className="flex-1">{renderPage()}</main>
 
-      <Footer />
-      <CartDrawer />
+      {!isAdmin && <Footer />}
+      {!isAdmin && <CartDrawer />}
 
       {toastMessage && (
         <div

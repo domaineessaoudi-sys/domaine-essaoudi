@@ -5,12 +5,15 @@ import {
   ChevronLeft,
   ChevronRight,
   Edit3,
+  Globe,
   Lock,
   LogOut,
   Mail,
+  Moon,
   Plus,
   Search,
   Send,
+  Sun,
   Trash2,
   Upload,
 } from 'lucide-react';
@@ -130,6 +133,7 @@ export function AdminPage() {
     siteContent,
     refreshSiteContent,
     showToast,
+    navigate,
   } = useApp();
 
   const [authChecking, setAuthChecking] = useState(true);
@@ -152,6 +156,21 @@ export function AdminPage() {
   const [orderYearFilter, setOrderYearFilter] = useState<string>('all');
   const [orderPage, setOrderPage] = useState<number>(1);
   const ordersPerPage = 10;
+
+  const [darkMode, setDarkMode] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('domaine_admin_dark') === 'true';
+    }
+    return false;
+  });
+
+  const toggleDarkMode = () => {
+    setDarkMode((prev) => {
+      const next = !prev;
+      localStorage.setItem('domaine_admin_dark', String(next));
+      return next;
+    });
+  };
 
   const [showProductForm, setShowProductForm] = useState(false);
   const [productForm, setProductForm] = useState<ProductFormState>(EMPTY_PRODUCT_FORM);
@@ -610,122 +629,229 @@ export function AdminPage() {
 
   if (authChecking) {
     return (
-      <div className="max-w-md mx-auto px-4 py-24 text-center text-sm text-[#516358]">
-        {t.common.loading}
+      <div className={`admin-theme ${darkMode ? 'dark' : ''} min-h-screen flex items-center justify-center`}>
+        <div className="text-sm font-medium text-[#516358]">{t.common.loading}</div>
       </div>
     );
   }
 
   if (!adminToken) {
     return (
-      <div className="max-w-md mx-auto px-4 py-16 sm:py-24">
-        <div className="bg-white rounded-2xl border border-[#DCE8DF] p-6 sm:p-8 space-y-6">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-[#0E3B22]/10 text-[#0E3B22] flex items-center justify-center shrink-0">
-              <Lock className="w-5 h-5" aria-hidden="true" />
+      <div className={`admin-theme ${darkMode ? 'dark' : ''} min-h-screen flex flex-col`}>
+        {/* Backoffice Clean Header Bar */}
+        <header className="border-b border-[#DCE8DF] bg-white transition-colors">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#1E5C36] to-[#0E3B22] text-white flex items-center justify-center font-bold text-sm shadow-xs">
+                DE
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="font-display font-bold text-sm sm:text-base text-[#0F2418]">
+                    Domaine Essaoudi
+                  </span>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-emerald-500/10 text-emerald-700 border border-emerald-500/20">
+                    Backoffice
+                  </span>
+                </div>
+              </div>
             </div>
-            <div>
-              <h1 className="font-display text-xl font-semibold text-[#0F2418]">
-                {configured ? t.admin.loginTitle : t.admin.claimTitle}
-              </h1>
-              <p className="text-xs text-[#516358] mt-0.5">
-                {configured ? t.admin.loginSubtitle : t.admin.claimSubtitle}
-              </p>
+
+            <div className="flex items-center gap-2 sm:gap-3">
+              <button
+                type="button"
+                onClick={() => navigate('/')}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border border-[#DCE8DF] bg-white text-[#0F2418] hover:bg-[#F2F7F4] transition-colors"
+                title="Retourner au site public"
+              >
+                <Globe className="w-4 h-4 text-[#2E7D47]" />
+                <span>Voir web site</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={toggleDarkMode}
+                className="p-2 rounded-xl text-xs font-semibold border border-[#DCE8DF] bg-white text-[#0F2418] hover:bg-[#F2F7F4] transition-colors"
+                title={darkMode ? 'Mode clair' : 'Mode sombre'}
+                aria-label="Basculer le thème"
+              >
+                {darkMode ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-600" />}
+              </button>
             </div>
           </div>
+        </header>
 
-          {authError && (
-            <div className="p-3 rounded-lg bg-[#FEE2E2] text-[#991B1B] text-xs font-medium">
-              {authError}
+        <div className="flex-1 flex items-center justify-center p-4 py-16 sm:py-24">
+          <div className="max-w-md w-full bg-white rounded-2xl border border-[#DCE8DF] p-6 sm:p-8 space-y-6 shadow-sm">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-[#0E3B22]/10 text-[#0E3B22] flex items-center justify-center shrink-0">
+                <Lock className="w-5 h-5" aria-hidden="true" />
+              </div>
+              <div>
+                <h1 className="font-display text-xl font-semibold text-[#0F2418]">
+                  {configured ? t.admin.loginTitle : t.admin.claimTitle}
+                </h1>
+                <p className="text-xs text-[#516358] mt-0.5">
+                  {configured ? t.admin.loginSubtitle : t.admin.claimSubtitle}
+                </p>
+              </div>
             </div>
-          )}
 
-          <form onSubmit={handleAuthSubmit} className="space-y-4">
-            <div>
-              <label
-                htmlFor="admin-password"
-                className="block text-xs font-semibold text-[#4A5D52] mb-1.5"
+            {authError && (
+              <div className="p-3 rounded-lg bg-[#FEE2E2] text-[#991B1B] text-xs font-medium">
+                {authError}
+              </div>
+            )}
+
+            <form onSubmit={handleAuthSubmit} className="space-y-4">
+              <div>
+                <label
+                  htmlFor="admin-password"
+                  className="block text-xs font-semibold text-[#4A5D52] mb-1.5"
+                >
+                  {t.admin.passwordLabel}
+                </label>
+                <input
+                  id="admin-password"
+                  type="password"
+                  autoComplete={configured ? 'current-password' : 'new-password'}
+                  value={passwordInput}
+                  onChange={(e) => setPasswordInput(e.target.value)}
+                  className="w-full px-3.5 py-2.5 text-sm rounded-lg border border-[#DCE8DF] bg-[#F7FAF7]"
+                  placeholder={configured ? '••••••••' : 'Minimum 6 characters'}
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={authSubmitting}
+                className="w-full py-3 px-4 rounded-lg bg-[#0E3B22] hover:bg-[#082716] disabled:opacity-60 text-white text-sm font-semibold transition-colors"
               >
-                {t.admin.passwordLabel}
-              </label>
-              <input
-                id="admin-password"
-                type="password"
-                autoComplete={configured ? 'current-password' : 'new-password'}
-                value={passwordInput}
-                onChange={(e) => setPasswordInput(e.target.value)}
-                className="w-full px-3.5 py-2.5 text-sm rounded-lg border border-[#DCE8DF] bg-[#F7FAF7]"
-                placeholder={configured ? '••••••••' : 'Minimum 6 characters'}
-              />
-            </div>
-
-            <button
-              type="submit"
-              disabled={authSubmitting}
-              className="w-full py-3 px-4 rounded-lg bg-[#0E3B22] hover:bg-[#082716] disabled:opacity-60 text-white text-sm font-semibold transition-colors"
-            >
-              {authSubmitting
-                ? t.common.loading
-                : configured
-                  ? t.admin.loginBtn
-                  : t.admin.claimBtn}
-            </button>
-          </form>
+                {authSubmitting
+                  ? t.common.loading
+                  : configured
+                    ? t.admin.loginBtn
+                    : t.admin.claimBtn}
+              </button>
+            </form>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
-      {/* Admin Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[#DCE8DF]">
-        <div>
-          <h1 className="font-display text-2xl sm:text-3xl font-semibold text-[#0F2418]">
-            {t.admin.title}
-          </h1>
-        </div>
-        <button
-          type="button"
-          onClick={handleLogout}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-[#DCE8DF] bg-white hover:bg-[#EDF4EE] text-xs font-semibold text-[#0F2418] whitespace-nowrap shrink-0 self-start sm:self-auto"
-        >
-          <LogOut className="w-4 h-4" aria-hidden="true" />
-          <span>{t.admin.logoutBtn}</span>
-        </button>
-      </div>
+    <div className={`admin-theme ${darkMode ? 'dark' : ''} min-h-screen flex flex-col`}>
+      {/* Backoffice Dedicated Header Bar */}
+      <header className="sticky top-0 z-40 border-b border-[#DCE8DF] bg-white transition-colors">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#1E5C36] to-[#0E3B22] text-white flex items-center justify-center font-bold text-sm shadow-xs">
+              DE
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="font-display font-bold text-sm sm:text-base text-[#0F2418]">
+                  Domaine Essaoudi
+                </span>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-emerald-500/10 text-emerald-700 border border-emerald-500/20">
+                  Backoffice
+                </span>
+              </div>
+              <div className="text-[11px] text-[#516358] hidden sm:block">
+                Tableau de bord d'administration
+              </div>
+            </div>
+          </div>
 
-      {/* Tabs */}
-      <div
-        role="tablist"
-        aria-label="Admin sections"
-        className="flex flex-wrap gap-1.5 p-1.5 bg-[#EDF4EE] rounded-xl border border-[#DCE8DF] w-fit"
-      >
-        {(
-          [
-            { key: 'overview', label: t.admin.tabs.overview },
-            { key: 'products', label: t.admin.tabs.products },
-            { key: 'orders', label: t.admin.tabs.orders },
-            { key: 'content', label: t.admin.tabs.content },
-            { key: 'sql', label: t.admin.tabs.sql },
-          ] as Array<{ key: AdminTab; label: string }>
-        ).map((tab) => (
-          <button
-            key={tab.key}
-            role="tab"
-            type="button"
-            aria-selected={activeTab === tab.key}
-            onClick={() => setActiveTab(tab.key)}
-            className={`px-4 py-2 text-xs sm:text-sm font-semibold rounded-lg transition-colors whitespace-nowrap ${
-              activeTab === tab.key
-                ? 'bg-white text-[#0F2418] shadow-sm'
-                : 'text-[#516358] hover:text-[#0F2418]'
-            }`}
+          <div className="flex items-center gap-2 sm:gap-3">
+            {/* "Voir web site" button */}
+            <button
+              type="button"
+              onClick={() => navigate('/')}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 sm:py-2 rounded-xl text-xs font-semibold border border-[#DCE8DF] bg-white text-[#0F2418] hover:bg-[#F2F7F4] transition-all shadow-xs"
+              title="Retourner au site public"
+            >
+              <Globe className="w-4 h-4 text-[#2E7D47]" />
+              <span className="hidden sm:inline">Voir web site</span>
+              <span className="sm:hidden">Site</span>
+            </button>
+
+            {/* Dark Mode toggle */}
+            <button
+              type="button"
+              onClick={toggleDarkMode}
+              className="inline-flex items-center gap-1.5 p-2 sm:px-3 sm:py-2 rounded-xl text-xs font-semibold border border-[#DCE8DF] bg-white text-[#0F2418] hover:bg-[#F2F7F4] transition-all shadow-xs"
+              title={darkMode ? 'Passer en mode clair' : 'Passer en mode sombre'}
+              aria-label="Basculer le thème"
+            >
+              {darkMode ? (
+                <>
+                  <Sun className="w-4 h-4 text-amber-400" />
+                  <span className="hidden md:inline">Mode clair</span>
+                </>
+              ) : (
+                <>
+                  <Moon className="w-4 h-4 text-slate-600" />
+                  <span className="hidden md:inline">Mode sombre</span>
+                </>
+              )}
+            </button>
+
+            {/* Logout button */}
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 sm:py-2 rounded-xl text-xs font-semibold border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 transition-colors"
+              title={t.admin.logoutBtn}
+            >
+              <LogOut className="w-4 h-4 shrink-0" />
+              <span className="hidden sm:inline">{t.admin.logoutBtn}</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content Area */}
+      <div className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+        {/* Navigation Tabs Bar */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div
+            role="tablist"
+            aria-label="Admin sections"
+            className="flex flex-wrap gap-1.5 p-1.5 bg-[#EDF4EE] rounded-xl border border-[#DCE8DF] w-fit shadow-xs"
           >
-            {tab.label}
-          </button>
-        ))}
-      </div>
+            {(
+              [
+                { key: 'overview', label: t.admin.tabs.overview },
+                { key: 'products', label: t.admin.tabs.products },
+                { key: 'orders', label: t.admin.tabs.orders },
+                { key: 'content', label: t.admin.tabs.content },
+                { key: 'sql', label: t.admin.tabs.sql },
+              ] as Array<{ key: AdminTab; label: string }>
+            ).map((tab) => (
+              <button
+                key={tab.key}
+                role="tab"
+                type="button"
+                aria-selected={activeTab === tab.key}
+                onClick={() => setActiveTab(tab.key)}
+                className={`px-4 py-2 text-xs sm:text-sm font-semibold rounded-lg transition-all whitespace-nowrap ${
+                  activeTab === tab.key
+                    ? 'bg-white text-[#0F2418] shadow-xs'
+                    : 'text-[#516358] hover:text-[#0F2418]'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          <div className="text-xs text-[#516358] flex items-center gap-2 self-start sm:self-auto">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span>Connecté à Supabase</span>
+          </div>
+        </div>
 
       {adminDbError && activeTab !== 'sql' && (
         <div className="rounded-xl border border-red-200 bg-[#FEE2E2] px-4 py-3 flex flex-wrap items-center justify-between gap-3 text-xs text-[#991B1B]">
@@ -1849,6 +1975,7 @@ export function AdminPage() {
 
       {/* SQL EDITOR & SUPABASE TAB */}
       {activeTab === 'sql' && <AdminSqlEditor adminToken={adminToken} showToast={showToast} />}
+      </div>
     </div>
   );
 }
