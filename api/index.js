@@ -2745,6 +2745,120 @@ app.patch("/api/admin/messages/:id", requireAdmin, async (req, res) => {
     });
   }
 });
+async function ensureAdminAuthColumns() {
+  const alterSql = `
+    ALTER TABLE admin_auth
+      ADD COLUMN IF NOT EXISTS username TEXT,
+      ADD COLUMN IF NOT EXISTS email TEXT,
+      ADD COLUMN IF NOT EXISTS role TEXT NOT NULL DEFAULT 'admin',
+      ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT NOW();
+  `;
+  try {
+    await executeSqlQuery({ target: "supabase", sql: alterSql });
+  } catch {
+  }
+}
+app.get("/api/admin/users", requireAdmin, async (_req, res) => {
+  try {
+    await ensureAdminAuthColumns();
+    const result = await executeSqlQuery({
+      target: "supabase",
+      sql: "SELECT id, COALESCE(username, 'admin') as username, COALESCE(email, '') as email, COALESCE(role, 'admin') as role, COALESCE(created_at, updated_at) as created_at, updated_at FROM admin_auth ORDER BY id DESC;"
+    });
+    res.json({ users: result.rows || [] });
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : "Erreur chargement utilisateurs." });
+  }
+});
+app.post("/api/admin/users", requireAdmin, async (req, res) => {
+  try {
+    await ensureAdminAuthColumns();
+    const { username, email, password, role } = req.body || {};
+    if (!username || typeof username !== "string" || username.trim().length < 2) {
+      res.status(400).json({ error: "Nom d'utilisateur requis (min 2 caract\xE8res)." });
+      return;
+    }
+    if (!password || typeof password !== "string" || password.length < 6) {
+      res.status(400).json({ error: "Mot de passe requis (min 6 caract\xE8res)." });
+      return;
+    }
+    const allowedRoles = ["admin", "editor", "viewer"];
+    const safeRole = allowedRoles.includes(role) ? role : "viewer";
+    const salt = crypto3.randomBytes(16).toString("hex");
+    const passwordHash = crypto3.createHmac("sha256", salt).update(password).digest("hex");
+    const safeUsername = username.trim().replace(/'/g, "''");
+    const safeEmail = (email || "").trim().replace(/'/g, "''");
+    const result = await executeSqlQuery({
+      target: "supabase",
+      sql: `INSERT INTO admin_auth (username, email, password_hash, salt, role, created_at, updated_at)
+            VALUES ('${safeUsername}', '${safeEmail}', '${passwordHash}', '${salt}', '${safeRole}', NOW(), NOW())
+            RETURNING id, COALESCE(username,'admin') as username, COALESCE(email,'') as email, COALESCE(role,'admin') as role, created_at, updated_at;`
+    });
+    res.json({ user: result.rows?.[0] || null });
+  } catch (err) {
+    res.status(400).json({ error: err instanceof Error ? err.message : "Erreur cr\xE9ation utilisateur." });
+  }
+});
+app.patch("/api/admin/users/:id", requireAdmin, async (req, res) => {
+  try {
+    const id = req.params.id;
+    const { username, email, password, role } = req.body || {};
+    const allowedRoles = ["admin", "editor", "viewer"];
+    const setParts = [];
+    if (username && typeof username === "string" && username.trim().length >= 2) {
+      setParts.push(`username = '${username.trim().replace(/'/g, "''")}'`);
+    }
+    if (email !== void 0) {
+      setParts.push(`email = '${String(email).trim().replace(/'/g, "''")}'`);
+    }
+    if (role && allowedRoles.includes(role)) {
+      setParts.push(`role = '${role}'`);
+    }
+    if (password && typeof password === "string" && password.length >= 6) {
+      const salt = crypto3.randomBytes(16).toString("hex");
+      const passwordHash = crypto3.createHmac("sha256", salt).update(password).digest("hex");
+      setParts.push(`password_hash = '${passwordHash}', salt = '${salt}'`);
+    }
+    if (setParts.length === 0) {
+      res.status(400).json({ error: "Aucun champ valide \xE0 mettre \xE0 jour." });
+      return;
+    }
+    setParts.push(`updated_at = NOW()`);
+    const numericId = parseInt(String(id), 10);
+    if (isNaN(numericId)) {
+      res.status(400).json({ error: "ID invalide." });
+      return;
+    }
+    const result = await executeSqlQuery({
+      target: "supabase",
+      sql: `UPDATE admin_auth SET ${setParts.join(", ")} WHERE id = ${numericId}
+            RETURNING id, COALESCE(username,'admin') as username, COALESCE(email,'') as email, COALESCE(role,'admin') as role, COALESCE(created_at, updated_at) as created_at, updated_at;`
+    });
+    if (!result.rows?.length) {
+      res.status(404).json({ error: "Utilisateur introuvable." });
+      return;
+    }
+    res.json({ user: result.rows[0] });
+  } catch (err) {
+    res.status(400).json({ error: err instanceof Error ? err.message : "Erreur mise \xE0 jour utilisateur." });
+  }
+});
+app.delete("/api/admin/users/:id", requireAdmin, async (req, res) => {
+  try {
+    const numericId = parseInt(String(req.params.id), 10);
+    if (isNaN(numericId)) {
+      res.status(400).json({ error: "ID invalide." });
+      return;
+    }
+    await executeSqlQuery({
+      target: "supabase",
+      sql: `DELETE FROM admin_auth WHERE id = ${numericId};`
+    });
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(400).json({ error: err instanceof Error ? err.message : "Erreur suppression utilisateur." });
+  }
+});
 app.get("/api/admin/supabase/config", requireAdmin, (_req, res) => {
   res.json({ supabase: getPublicSupabaseStatus() });
 });
