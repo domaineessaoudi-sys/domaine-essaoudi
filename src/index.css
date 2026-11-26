@@ -32,71 +32,83 @@
 }
 
 /* ==========================================================================
-   Backoffice Theme & Dark Mode Support
+   Backoffice Theme & Dark Mode Support (Dribbble Appbox Aesthetic)
    ========================================================================== */
 .admin-theme {
-  --adm-bg: #f7faf7;
+  --adm-bg: #e2f1f8;
+  --adm-shell: #ffffff;
   --adm-card: #ffffff;
-  --adm-border: #dce8df;
-  --adm-border-sub: #eef4f0;
-  --adm-text-title: #0f2418;
-  --adm-text-body: #26382e;
-  --adm-text-muted: #516358;
-  --adm-input-bg: #ffffff;
-  --adm-input-border: #dce8df;
-  --adm-row-hover: #f2f7f4;
-  --adm-tab-bg: #edf4ee;
+  --adm-border: #e1edf3;
+  --adm-border-sub: #edf5f9;
+  --adm-text-title: #132e3f;
+  --adm-text-body: #334d5d;
+  --adm-text-muted: #6e8b9b;
+  --adm-input-bg: #f8fbfd;
+  --adm-input-border: #dbe7ee;
+  --adm-row-hover: #f3f8fb;
+  --adm-tab-bg: #edf5f9;
   --adm-header-bg: #ffffff;
   min-height: 100vh;
   background-color: var(--adm-bg);
   color: var(--adm-text-body);
-  transition: background-color 0.2s ease, color 0.2s ease;
+  transition: background-color 0.25s ease, color 0.25s ease;
 }
 
 .admin-theme.dark {
-  --adm-bg: #09120c;
-  --adm-card: #112017;
-  --adm-border: #1d3728;
-  --adm-border-sub: #162c1f;
-  --adm-text-title: #f0f7f2;
-  --adm-text-body: #d5e5db;
-  --adm-text-muted: #8ea899;
-  --adm-input-bg: #0b1610;
-  --adm-input-border: #1d3728;
-  --adm-row-hover: #15271d;
-  --adm-tab-bg: #0e1b13;
-  --adm-header-bg: #0d1912;
+  --adm-bg: #070e13;
+  --adm-shell: #0d171f;
+  --adm-card: #12222b;
+  --adm-border: #1a303e;
+  --adm-border-sub: #152632;
+  --adm-text-title: #eef6fa;
+  --adm-text-body: #c5d9e5;
+  --adm-text-muted: #7998aa;
+  --adm-input-bg: #0b151c;
+  --adm-input-border: #1a303e;
+  --adm-row-hover: #162833;
+  --adm-tab-bg: #0f1c25;
+  --adm-header-bg: #0d171f;
 }
 
 .admin-theme.dark .bg-white {
   background-color: var(--adm-card) !important;
 }
 
-.admin-theme.dark .bg-\[\#F7FAF7\] {
-  background-color: var(--adm-bg) !important;
+.admin-theme.dark .bg-\[\#F7FAF7\],
+.admin-theme.dark .bg-\[\#F4F9FC\] {
+  background-color: var(--adm-input-bg) !important;
 }
 
-.admin-theme.dark .bg-\[\#EDF4EE\] {
+.admin-theme.dark .bg-\[\#EDF4EE\],
+.admin-theme.dark .bg-\[\#EDF5F9\] {
   background-color: var(--adm-tab-bg) !important;
 }
 
-.admin-theme.dark .border-\[\#DCE8DF\] {
+.admin-theme.dark .border-\[\#DCE8DF\],
+.admin-theme.dark .border-\[\#E3EDF3\],
+.admin-theme.dark .border-\[\#E1EDF3\] {
   border-color: var(--adm-border) !important;
 }
 
-.admin-theme.dark .border-\[\#DCE8DF\]\/70 {
+.admin-theme.dark .border-\[\#DCE8DF\]\/70,
+.admin-theme.dark .border-\[\#EDF5F9\] {
   border-color: var(--adm-border-sub) !important;
 }
 
-.admin-theme.dark .text-\[\#0F2418\] {
+.admin-theme.dark .text-\[\#0F2418\],
+.admin-theme.dark .text-\[\#132E3F\],
+.admin-theme.dark .text-\[\#1C3647\] {
   color: var(--adm-text-title) !important;
 }
 
-.admin-theme.dark .text-\[\#4A5D52\] {
+.admin-theme.dark .text-\[\#4A5D52\],
+.admin-theme.dark .text-\[\#334D5D\] {
   color: var(--adm-text-body) !important;
 }
 
-.admin-theme.dark .text-\[\#516358\] {
+.admin-theme.dark .text-\[\#516358\],
+.admin-theme.dark .text-\[\#6E8B9B\],
+.admin-theme.dark .text-\[\#7A98A8\] {
   color: var(--adm-text-muted) !important;
 }
 
@@ -110,11 +122,12 @@
 
 .admin-theme.dark input::placeholder,
 .admin-theme.dark textarea::placeholder {
-  color: #5c7466 !important;
+  color: #557182 !important;
 }
 
 .admin-theme.dark .hover\:bg-\[\#EDF4EE\]:hover,
-.admin-theme.dark .hover\:bg-\[\#F2F7F4\]:hover {
+.admin-theme.dark .hover\:bg-\[\#F2F7F4\]:hover,
+.admin-theme.dark .hover\:bg-\[\#F3F8FB\]:hover {
   background-color: var(--adm-row-hover) !important;
 }
 

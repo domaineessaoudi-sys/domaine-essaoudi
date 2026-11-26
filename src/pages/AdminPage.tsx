@@ -1,21 +1,42 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
+  ArrowRight,
+  Bell,
+  Box,
   Calendar,
   Check,
+  ChevronDown,
   ChevronLeft,
   ChevronRight,
+  Cloud,
+  Database,
   Edit3,
+  ExternalLink,
   Globe,
+  LayoutDashboard,
   Lock,
   LogOut,
   Mail,
+  MessageCircle,
+  MessageSquare,
   Moon,
+  Package,
   Plus,
+  Receipt,
+  Rocket,
   Search,
   Send,
+  ShoppingBag,
+  ShoppingCart,
+  Sliders,
+  Sparkles,
+  Star,
   Sun,
   Trash2,
+  TrendingUp,
   Upload,
+  User,
+  Zap,
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import type {
@@ -741,258 +762,641 @@ export function AdminPage() {
   }
 
   return (
-    <div className={`admin-theme ${darkMode ? 'dark' : ''} min-h-screen flex flex-col`}>
-      {/* Backoffice Dedicated Header Bar */}
-      <header className="sticky top-0 z-40 border-b border-[#DCE8DF] bg-white transition-colors">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#1E5C36] to-[#0E3B22] text-white flex items-center justify-center font-bold text-sm shadow-xs">
-              DE
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="font-display font-bold text-sm sm:text-base text-[#0F2418]">
-                  Domaine Essaoudi
-                </span>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-emerald-500/10 text-emerald-700 border border-emerald-500/20">
-                  Backoffice
-                </span>
+    <div className={`admin-theme ${darkMode ? 'dark' : ''} min-h-screen p-2 sm:p-5 lg:p-7 flex justify-center items-start`}>
+      {/* Main Dashboard Canvas Shell (Floating Card from design) */}
+      <div className="w-full max-w-[1440px] bg-white dark:bg-[#0D171F] rounded-[32px] sm:rounded-[36px] border border-[#D5E6EE] dark:border-[#182C38] shadow-[0_20px_60px_-15px_rgba(23,84,116,0.14)] dark:shadow-[0_25px_60px_rgba(0,0,0,0.65)] overflow-hidden flex flex-col">
+        {/* Top Header Bar inside Shell */}
+        <header className="h-20 border-b border-[#EDF4F8] dark:border-[#182B37] px-4 sm:px-8 flex items-center justify-between gap-4 bg-white/70 dark:bg-[#0D171F]/80 backdrop-blur-md shrink-0">
+          {/* Left Brand + Active Section */}
+          <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#0284C7] to-[#0369A1] text-white flex items-center justify-center font-bold text-sm shadow-md shadow-sky-500/20 shrink-0">
+                DE
               </div>
-              <div className="text-[11px] text-[#516358] hidden sm:block">
-                Tableau de bord d'administration
-              </div>
+              <span className="font-display font-extrabold text-base sm:text-lg tracking-tight text-[#0B4A6F] dark:text-[#67D4F8] truncate">
+                domaine essaoudi
+              </span>
             </div>
+
+            <span className="text-[#CFE0EB] dark:text-[#253E50] text-xl font-light hidden sm:inline">
+              |
+            </span>
+
+            <span className="font-display font-bold text-xs sm:text-sm tracking-wider text-[#1C3647] dark:text-[#E2EFF7] uppercase truncate hidden sm:inline">
+              {activeTab === 'overview'
+                ? 'DASHBOARD'
+                : activeTab === 'products'
+                  ? 'PRODUITS'
+                  : activeTab === 'orders'
+                    ? 'COMMANDES'
+                    : activeTab === 'content'
+                      ? 'CONTENU'
+                      : 'SUPABASE SQL'}
+            </span>
           </div>
 
-          <div className="flex items-center gap-2 sm:gap-3">
-            {/* "Voir web site" button */}
-            <button
-              type="button"
-              onClick={() => navigate('/')}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 sm:py-2 rounded-xl text-xs font-semibold border border-[#DCE8DF] bg-white text-[#0F2418] hover:bg-[#F2F7F4] transition-all shadow-xs"
-              title="Retourner au site public"
-            >
-              <Globe className="w-4 h-4 text-[#2E7D47]" />
-              <span className="hidden sm:inline">Voir web site</span>
-              <span className="sm:hidden">Site</span>
-            </button>
+          {/* Right Area: Alerts, Mode Dark, User greeting, CTA "VOIR WEB SITE" */}
+          <div className="flex items-center gap-2 sm:gap-4 shrink-0">
+            {/* Notification Bell */}
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setActiveTab('content')}
+                className="w-10 h-10 rounded-full flex items-center justify-center text-[#7A98A8] dark:text-[#6C8A9B] hover:text-[#0284C7] hover:bg-[#F2F8FC] dark:hover:bg-[#152530] transition-colors relative"
+                title="Messages et alertes"
+                aria-label="Alertes"
+              >
+                <Bell className="w-5 h-5" />
+                {stats && stats.unreadMessages > 0 && (
+                  <span className="absolute top-2 end-2 w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+                )}
+              </button>
+            </div>
 
             {/* Dark Mode toggle */}
             <button
               type="button"
               onClick={toggleDarkMode}
-              className="inline-flex items-center gap-1.5 p-2 sm:px-3 sm:py-2 rounded-xl text-xs font-semibold border border-[#DCE8DF] bg-white text-[#0F2418] hover:bg-[#F2F7F4] transition-all shadow-xs"
+              className="w-10 h-10 rounded-full flex items-center justify-center text-[#7A98A8] dark:text-[#6C8A9B] hover:text-[#0284C7] hover:bg-[#F2F8FC] dark:hover:bg-[#152530] transition-colors"
               title={darkMode ? 'Passer en mode clair' : 'Passer en mode sombre'}
               aria-label="Basculer le thème"
             >
-              {darkMode ? (
-                <>
-                  <Sun className="w-4 h-4 text-amber-400" />
-                  <span className="hidden md:inline">Mode clair</span>
-                </>
-              ) : (
-                <>
-                  <Moon className="w-4 h-4 text-slate-600" />
-                  <span className="hidden md:inline">Mode sombre</span>
-                </>
-              )}
+              {darkMode ? <Sun className="w-5 h-5 text-amber-400" /> : <Moon className="w-5 h-5 text-slate-600" />}
+            </button>
+
+            {/* User Greeting & Avatar */}
+            <div className="flex items-center gap-2.5 ps-1 sm:ps-2">
+              <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-[#0284C7] to-[#38BDF8] text-white flex items-center justify-center font-bold text-xs ring-2 ring-white dark:ring-[#1E3444] shadow-xs shrink-0">
+                SA
+              </div>
+              <div className="text-start hidden lg:block">
+                <div className="text-[10px] text-[#7A98A8] dark:text-[#6C8A9B] leading-none">
+                  Bonjour,
+                </div>
+                <div className="text-xs font-bold text-[#1C3647] dark:text-[#E2EFF7] leading-tight mt-0.5">
+                  Admin Said
+                </div>
+              </div>
+            </div>
+
+            {/* Prominent Pill CTA: VOIR WEB SITE (From image design) */}
+            <button
+              type="button"
+              onClick={() => navigate('/')}
+              className="bg-gradient-to-r from-[#00C9A7] to-[#00A887] hover:from-[#00B899] hover:to-[#00987A] text-white font-bold text-xs uppercase tracking-wider px-4 sm:px-5 py-2 sm:py-2.5 rounded-full shadow-md shadow-emerald-500/20 hover:shadow-lg flex items-center gap-2 transition-all hover:scale-[1.02] active:scale-[0.98]"
+              title="Retourner à la boutique publique"
+            >
+              <Send className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">VOIR WEB SITE</span>
+              <span className="sm:hidden">SITE</span>
             </button>
 
             {/* Logout button */}
             <button
               type="button"
               onClick={handleLogout}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 sm:py-2 rounded-xl text-xs font-semibold border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 transition-colors"
+              className="w-9 h-9 rounded-full flex items-center justify-center text-red-500/80 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
               title={t.admin.logoutBtn}
+              aria-label="Déconnexion"
             >
-              <LogOut className="w-4 h-4 shrink-0" />
-              <span className="hidden sm:inline">{t.admin.logoutBtn}</span>
+              <LogOut className="w-4 h-4" />
             </button>
           </div>
-        </div>
-      </header>
+        </header>
 
-      {/* Main Content Area */}
-      <div className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
-        {/* Navigation Tabs Bar */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div
-            role="tablist"
-            aria-label="Admin sections"
-            className="flex flex-wrap gap-1.5 p-1.5 bg-[#EDF4EE] rounded-xl border border-[#DCE8DF] w-fit shadow-xs"
-          >
+        {/* Body Section: Left Pill Sidebar + Main Content Area */}
+        <div className="flex flex-col md:flex-row flex-1 p-4 sm:p-6 lg:p-8 gap-6 lg:gap-8 items-start">
+          {/* Left Vertical Pill Sidebar (Exact pill capsule design from screenshot) */}
+          <aside className="w-full md:w-20 md:self-stretch bg-[#F4F9FC] dark:bg-[#12222B] rounded-2xl md:rounded-[40px] border border-[#E1EDF3] dark:border-[#1E3444] p-2 sm:p-3 md:py-6 flex flex-row md:flex-col items-center justify-between md:justify-start gap-2 md:gap-6 shrink-0 shadow-xs">
             {(
               [
-                { key: 'overview', label: t.admin.tabs.overview },
-                { key: 'products', label: t.admin.tabs.products },
-                { key: 'orders', label: t.admin.tabs.orders },
-                { key: 'content', label: t.admin.tabs.content },
-                { key: 'sql', label: t.admin.tabs.sql },
-              ] as Array<{ key: AdminTab; label: string }>
-            ).map((tab) => (
-              <button
-                key={tab.key}
-                role="tab"
-                type="button"
-                aria-selected={activeTab === tab.key}
-                onClick={() => setActiveTab(tab.key)}
-                className={`px-4 py-2 text-xs sm:text-sm font-semibold rounded-lg transition-all whitespace-nowrap ${
-                  activeTab === tab.key
-                    ? 'bg-white text-[#0F2418] shadow-xs'
-                    : 'text-[#516358] hover:text-[#0F2418]'
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
+                { key: 'overview', label: 'Dashboard', icon: LayoutDashboard },
+                { key: 'products', label: 'Produits', icon: Package },
+                { key: 'orders', label: 'Commandes', icon: ShoppingCart },
+                { key: 'content', label: 'Contenu', icon: Sliders },
+                { key: 'sql', label: 'Supabase', icon: Database },
+              ] as const
+            ).map((item) => {
+              const IconComp = item.icon;
+              const isActive = activeTab === item.key;
+              return (
+                <button
+                  key={item.key}
+                  type="button"
+                  onClick={() => setActiveTab(item.key)}
+                  className={`w-12 h-12 md:w-14 md:h-14 rounded-2xl flex flex-col items-center justify-center gap-1 transition-all ${
+                    isActive
+                      ? 'bg-gradient-to-br from-[#0284C7] to-[#0369A1] text-white shadow-md shadow-sky-500/25 scale-105'
+                      : 'text-[#7896A6] dark:text-[#648496] hover:text-[#0284C7] dark:hover:text-[#38BDF8] hover:bg-white dark:hover:bg-[#1A2E3B]'
+                  }`}
+                  title={item.label}
+                >
+                  <IconComp className="w-5 h-5 shrink-0" />
+                  <span className="text-[9px] font-semibold leading-none tracking-tight">
+                    {item.label}
+                  </span>
+                </button>
+              );
+            })}
 
-          <div className="text-xs text-[#516358] flex items-center gap-2 self-start sm:self-auto">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span>Connecté à Supabase</span>
-          </div>
-        </div>
+            <div className="hidden md:flex mt-auto pt-4 text-[#A1B8C5] dark:text-[#425E70]">
+              <div className="w-1.5 h-1.5 rounded-full bg-[#A1B8C5] dark:bg-[#425E70]"></div>
+            </div>
+          </aside>
 
-      {adminDbError && activeTab !== 'sql' && (
-        <div className="rounded-xl border border-red-200 bg-[#FEE2E2] px-4 py-3 flex flex-wrap items-center justify-between gap-3 text-xs text-[#991B1B]">
-          <span>{adminDbError}</span>
-          <button
-            type="button"
-            onClick={() => setActiveTab('sql')}
-            className="px-3 py-1.5 rounded-lg bg-[#9E2A2B] text-white font-semibold hover:bg-[#7F1D1D] transition-colors shrink-0"
-          >
-            Ouvrir SQL Editor &amp; Supabase
-          </button>
-        </div>
-      )}
+          {/* Right Main Working Area */}
+          <main className="flex-1 w-full min-w-0 space-y-6">
+            {adminDbError && activeTab !== 'sql' && (
+              <div className="rounded-2xl border border-red-200 bg-[#FEE2E2] px-4 py-3 flex flex-wrap items-center justify-between gap-3 text-xs text-[#991B1B]">
+                <span>{adminDbError}</span>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('sql')}
+                  className="px-3 py-1.5 rounded-xl bg-[#9E2A2B] text-white font-semibold hover:bg-[#7F1D1D] transition-colors shrink-0"
+                >
+                  Ouvrir SQL Editor &amp; Supabase
+                </button>
+              </div>
+            )}
 
-      {emailStatus && !emailStatus.configured && activeTab !== 'content' && (
-        <div className="rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 flex flex-wrap items-center justify-between gap-3 text-xs text-amber-950">
-          <span>
-            Configurez vos 3 identifiants EmailJS (Service ID, Template ID, Public Key) pour recevoir
-            automatiquement chaque commande sur <strong dir="ltr">{emailStatus.recipientEmail}</strong>.
-          </span>
-          <button
-            type="button"
-            onClick={() => setActiveTab('content')}
-            className="px-3 py-1.5 rounded-lg bg-[#0E3B22] text-white font-semibold hover:bg-[#082716] transition-colors"
-          >
-            Configurer EmailJS
-          </button>
-        </div>
-      )}
+            {emailStatus && !emailStatus.configured && activeTab !== 'content' && (
+              <div className="rounded-2xl border border-amber-300 bg-amber-50 px-4 py-3 flex flex-wrap items-center justify-between gap-3 text-xs text-amber-950">
+                <span>
+                  Configurez vos 3 identifiants EmailJS pour recevoir automatiquement chaque commande sur{' '}
+                  <strong dir="ltr">{emailStatus.recipientEmail}</strong>.
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('content')}
+                  className="px-3 py-1.5 rounded-xl bg-[#0284C7] text-white font-semibold hover:bg-[#0369A1] transition-colors"
+                >
+                  Configurer EmailJS
+                </button>
+              </div>
+            )}
 
-      {loadingData && !stats ? (
-        <div className="py-12 text-sm text-[#516358]">{t.common.loading}</div>
-      ) : null}
+            {loadingData && !stats ? (
+              <div className="py-12 text-sm text-[#516358] text-center">{t.common.loading}</div>
+            ) : null}
 
-      {/* OVERVIEW TAB */}
-      {activeTab === 'overview' && stats && (
-        <div className="space-y-8">
-          <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-            <div className="bg-white rounded-xl border border-[#DCE8DF] p-5 space-y-1">
-              <div className="text-xs text-[#516358]">{t.admin.kpis.revenue}</div>
-              <div className="font-display text-2xl sm:text-3xl font-bold text-[#0E3B22] tabular-nums">
-                {formatMad(stats.totalRevenueMad, lang)}
-              </div>
-            </div>
-            <div className="bg-white rounded-xl border border-[#DCE8DF] p-5 space-y-1">
-              <div className="text-xs text-[#516358]">{t.admin.kpis.totalOrders}</div>
-              <div className="font-display text-2xl sm:text-3xl font-bold text-[#0F2418] tabular-nums">
-                {stats.totalOrders}
-              </div>
-            </div>
-            <div className="bg-white rounded-xl border border-[#DCE8DF] p-5 space-y-1">
-              <div className="text-xs text-[#516358]">{t.admin.kpis.pendingOrders}</div>
-              <div className="font-display text-2xl sm:text-3xl font-bold text-[#9A6B32] tabular-nums">
-                {stats.pendingOrders}
-              </div>
-            </div>
-            <div className="bg-white rounded-xl border border-[#DCE8DF] p-5 space-y-1">
-              <div className="text-xs text-[#516358]">{t.admin.kpis.completedOrders}</div>
-              <div className="font-display text-2xl sm:text-3xl font-bold text-[#0F2418] tabular-nums">
-                {stats.completedOrders}
-              </div>
-            </div>
-            <div className="bg-white rounded-xl border border-[#DCE8DF] p-5 space-y-1">
-              <div className="text-xs text-[#516358]">{t.admin.kpis.totalProducts}</div>
-              <div className="font-display text-2xl sm:text-3xl font-bold text-[#0F2418] tabular-nums">
-                {stats.totalProducts}
-              </div>
-            </div>
-            <div className="bg-white rounded-xl border border-[#DCE8DF] p-5 space-y-1">
-              <div className="text-xs text-[#516358]">{t.admin.kpis.unreadMessages}</div>
-              <div className="font-display text-2xl sm:text-3xl font-bold text-[#0F2418] tabular-nums">
-                {stats.unreadMessages}
-              </div>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            <div className="lg:col-span-4 bg-white rounded-xl border border-[#DCE8DF] p-6 space-y-4">
-              <h2 className="font-display text-lg font-semibold text-[#0F2418]">
-                {t.common.allCategories}
-              </h2>
-              <div className="divide-y divide-[#DCE8DF] text-sm">
-                <div className="py-3 flex justify-between">
-                  <span className="text-[#4A5D52]">{t.nav.vegetables}</span>
-                  <span className="font-mono font-semibold tabular-nums">
-                    {stats.categoryCounts.vegetables}
+            {/* OVERVIEW TAB (Exact Dashboard Recreation) */}
+            {activeTab === 'overview' && stats && (
+              <div className="space-y-6">
+                {/* Subtitle with Lightning icon */}
+                <div className="flex items-center gap-2 text-xs sm:text-sm text-[#5A7888] dark:text-[#8AA4B4]">
+                  <Zap className="w-4 h-4 text-sky-500 fill-sky-500 shrink-0" />
+                  <span>
+                    Aperçu en temps réel des statistiques, commandes et produits de votre boutique Domaine Essaoudi
                   </span>
                 </div>
-                <div className="py-3 flex justify-between">
-                  <span className="text-[#4A5D52]">{t.nav.oliveOil}</span>
-                  <span className="font-mono font-semibold tabular-nums">
-                    {stats.categoryCounts['olive-oil']}
-                  </span>
-                </div>
-                <div className="py-3 flex justify-between">
-                  <span className="text-[#4A5D52]">{t.nav.poultry}</span>
-                  <span className="font-mono font-semibold tabular-nums">
-                    {stats.categoryCounts.poultry}
-                  </span>
-                </div>
-              </div>
-            </div>
 
-            <div className="lg:col-span-8 bg-white rounded-xl border border-[#DCE8DF] p-6 space-y-4">
-              <h2 className="font-display text-lg font-semibold text-[#0F2418]">
-                {t.admin.tabs.orders}
-              </h2>
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-[#DCE8DF] text-xs text-[#516358] text-start">
-                      <th className="py-2 font-medium text-start">ID</th>
-                      <th className="py-2 font-medium text-start">Client</th>
-                      <th className="py-2 font-medium text-start">Status</th>
-                      <th className="py-2 font-medium text-end">Total</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-[#DCE8DF]/60">
-                    {stats.recentOrders.map((ord) => (
-                      <tr key={ord.id} className="h-11">
-                        <td className="font-mono text-xs tabular-nums">{ord.id}</td>
-                        <td className="font-medium text-[#0F2418]">{ord.customer_name}</td>
-                        <td>
-                          <span
-                            className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${ORDER_STATUS_STYLES[ord.status]}`}
-                          >
-                            {ord.status}
+                {/* Top 4 KPI Metrics Row (Matching the 4 horizontal metrics) */}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                  {/* Metric 1: Total Products */}
+                  <div className="bg-white dark:bg-[#12222B] rounded-2xl border border-[#E1EDF3] dark:border-[#1E3444] p-5 shadow-xs flex items-center justify-between">
+                    <div>
+                      <div className="font-display text-2xl sm:text-3xl font-extrabold text-[#132E3F] dark:text-[#EEF6FA] tabular-nums">
+                        {stats.totalProducts}
+                      </div>
+                      <div className="text-[11px] font-bold tracking-wider text-[#7A98A8] dark:text-[#6C8A9B] uppercase mt-1">
+                        PRODUITS EN LIGNE
+                      </div>
+                    </div>
+                    <div className="w-10 h-10 rounded-xl bg-cyan-50 dark:bg-cyan-950/40 text-cyan-500 flex items-center justify-center shrink-0">
+                      <Rocket className="w-5 h-5" />
+                    </div>
+                  </div>
+
+                  {/* Metric 2: Total Orders */}
+                  <div className="bg-white dark:bg-[#12222B] rounded-2xl border border-[#E1EDF3] dark:border-[#1E3444] p-5 shadow-xs flex items-center justify-between">
+                    <div>
+                      <div className="font-display text-2xl sm:text-3xl font-extrabold text-[#132E3F] dark:text-[#EEF6FA] tabular-nums">
+                        {stats.totalOrders}
+                      </div>
+                      <div className="text-[11px] font-bold tracking-wider text-[#7A98A8] dark:text-[#6C8A9B] uppercase mt-1">
+                        COMMANDES TOTALES
+                      </div>
+                    </div>
+                    <div className="w-10 h-10 rounded-xl bg-sky-50 dark:bg-sky-950/40 text-sky-500 flex items-center justify-center shrink-0">
+                      <Cloud className="w-5 h-5" />
+                    </div>
+                  </div>
+
+                  {/* Metric 3: Total Revenue */}
+                  <div className="bg-white dark:bg-[#12222B] rounded-2xl border border-[#E1EDF3] dark:border-[#1E3444] p-5 shadow-xs flex items-center justify-between">
+                    <div>
+                      <div className="font-display text-2xl sm:text-3xl font-extrabold text-[#0284C7] dark:text-[#38BDF8] tabular-nums">
+                        {stats.totalRevenueMad} <span className="text-sm font-semibold text-[#7A98A8]">MAD</span>
+                      </div>
+                      <div className="text-[11px] font-bold tracking-wider text-[#7A98A8] dark:text-[#6C8A9B] uppercase mt-1">
+                        CHIFFRE D'AFFAIRES
+                      </div>
+                    </div>
+                    <div className="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-500 flex items-center justify-center shrink-0">
+                      <Star className="w-5 h-5 fill-amber-500/20" />
+                    </div>
+                  </div>
+
+                  {/* Metric 4: Messages */}
+                  <div className="bg-white dark:bg-[#12222B] rounded-2xl border border-[#E1EDF3] dark:border-[#1E3444] p-5 shadow-xs flex items-center justify-between">
+                    <div>
+                      <div className="font-display text-2xl sm:text-3xl font-extrabold text-[#132E3F] dark:text-[#EEF6FA] tabular-nums">
+                        {stats.unreadMessages}
+                      </div>
+                      <div className="text-[11px] font-bold tracking-wider text-[#7A98A8] dark:text-[#6C8A9B] uppercase mt-1">
+                        MESSAGES CLIENTS
+                      </div>
+                    </div>
+                    <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 text-indigo-500 flex items-center justify-center shrink-0">
+                      <MessageSquare className="w-5 h-5" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Middle Two-Column Grid: Donut + Bar Chart (Left) and Recent Orders (Right) */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                  {/* Left Card: Category Breakdown with Donut & Bar Charts */}
+                  <div className="lg:col-span-7 bg-[#F4F9FC] dark:bg-[#12222B] rounded-[28px] border border-[#E1EDF3] dark:border-[#1E3444] p-6 space-y-6 shadow-xs">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                      <div>
+                        <h2 className="font-display font-bold text-base text-[#132E3F] dark:text-[#EEF6FA]">
+                          RÉPARTITION DU CATALOGUE
+                        </h2>
+                        <p className="text-xs text-[#7A98A8] dark:text-[#6C8A9B] mt-0.5">
+                          Distribution des produits par filière agricole
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-1 bg-white dark:bg-[#0B151C] p-1 rounded-xl border border-[#E1EDF3] dark:border-[#1E3444] text-xs font-semibold">
+                        <button
+                          type="button"
+                          className="px-3 py-1 rounded-lg bg-[#0284C7] text-white shadow-xs"
+                        >
+                          Total
+                        </button>
+                        <button
+                          type="button"
+                          className="px-3 py-1 rounded-lg text-[#7A98A8] hover:text-[#0284C7]"
+                        >
+                          Hebdo
+                        </button>
+                        <button
+                          type="button"
+                          className="px-3 py-1 rounded-lg text-[#7A98A8] hover:text-[#0284C7]"
+                        >
+                          Mois
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Donut and Bar Chart side-by-side inside card */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 items-center pt-2">
+                      {/* SVG Donut Chart with segmented colors */}
+                      <div className="flex flex-col items-center justify-center relative">
+                        <svg className="w-44 h-44 -rotate-90 transform" viewBox="0 0 120 120">
+                          {/* Background Ring */}
+                          <circle
+                            cx="60"
+                            cy="60"
+                            r="45"
+                            stroke="currentColor"
+                            strokeWidth="14"
+                            className="text-[#E2EFF6] dark:text-[#182C38]"
+                            fill="transparent"
+                          />
+                          {/* Segment 1: Olive Oil (Amber) */}
+                          <circle
+                            cx="60"
+                            cy="60"
+                            r="45"
+                            stroke="#F59E0B"
+                            strokeWidth="14"
+                            strokeDasharray="282.7"
+                            strokeDashoffset={
+                              282.7 -
+                              ((stats.categoryCounts['olive-oil'] || 0) /
+                                Math.max(1, stats.totalProducts)) *
+                                282.7
+                            }
+                            strokeLinecap="round"
+                            fill="transparent"
+                            className="transition-all duration-700"
+                          />
+                          {/* Segment 2: Poultry (Blue) */}
+                          <circle
+                            cx="60"
+                            cy="60"
+                            r="45"
+                            stroke="#0284C7"
+                            strokeWidth="14"
+                            strokeDasharray="282.7"
+                            strokeDashoffset={
+                              282.7 -
+                              ((stats.categoryCounts.poultry || 0) /
+                                Math.max(1, stats.totalProducts)) *
+                                282.7
+                            }
+                            strokeLinecap="round"
+                            fill="transparent"
+                            className="transition-all duration-700 opacity-90"
+                          />
+                          {/* Segment 3: Vegetables (Emerald) */}
+                          <circle
+                            cx="60"
+                            cy="60"
+                            r="45"
+                            stroke="#10B981"
+                            strokeWidth="14"
+                            strokeDasharray="282.7"
+                            strokeDashoffset={
+                              282.7 -
+                              ((stats.categoryCounts.vegetables || 0) /
+                                Math.max(1, stats.totalProducts)) *
+                                282.7
+                            }
+                            strokeLinecap="round"
+                            fill="transparent"
+                            className="transition-all duration-700 opacity-80"
+                          />
+                        </svg>
+
+                        {/* Donut Center Content Badge */}
+                        <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+                          <div className="w-9 h-9 rounded-full bg-[#0284C7] text-white flex items-center justify-center shadow-sm mb-0.5">
+                            <Package className="w-4 h-4" />
+                          </div>
+                          <div className="font-display font-extrabold text-lg text-[#132E3F] dark:text-[#EEF6FA] leading-tight">
+                            {stats.totalProducts}
+                          </div>
+                          <div className="text-[10px] font-semibold text-[#7A98A8] dark:text-[#6C8A9B]">
+                            Produits
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Vertical Bar Chart Column Bars (Matching image) */}
+                      <div className="flex items-end justify-between gap-3 h-44 px-3 pb-2 border-b border-[#E1EDF3] dark:border-[#1E3444]">
+                        {/* Bar 1: Olive Oil */}
+                        <div className="flex-1 flex flex-col items-center gap-2">
+                          <span className="text-xs font-bold text-[#132E3F] dark:text-[#EEF6FA] tabular-nums">
+                            {stats.categoryCounts['olive-oil']}
                           </span>
-                        </td>
-                        <td className="text-end font-semibold tabular-nums">
-                          {formatMad(ord.total_mad, lang)}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                          <div
+                            className="w-full max-w-[32px] bg-[#F59E0B] rounded-t-xl transition-all duration-700"
+                            style={{
+                              height: `${Math.max(
+                                24,
+                                ((stats.categoryCounts['olive-oil'] || 0) /
+                                  Math.max(1, stats.totalProducts)) *
+                                  100
+                              )}px`,
+                            }}
+                          ></div>
+                          <span className="text-[10px] font-semibold text-[#7A98A8] dark:text-[#6C8A9B] truncate w-full text-center">
+                            Huile
+                          </span>
+                        </div>
+
+                        {/* Bar 2: Poultry */}
+                        <div className="flex-1 flex flex-col items-center gap-2">
+                          <span className="text-xs font-bold text-[#0284C7] dark:text-[#38BDF8] tabular-nums">
+                            {stats.categoryCounts.poultry}
+                          </span>
+                          <div
+                            className="w-full max-w-[32px] bg-[#0284C7] rounded-t-xl transition-all duration-700"
+                            style={{
+                              height: `${Math.max(
+                                24,
+                                ((stats.categoryCounts.poultry || 0) /
+                                  Math.max(1, stats.totalProducts)) *
+                                  100
+                              )}px`,
+                            }}
+                          ></div>
+                          <span className="text-[10px] font-semibold text-[#7A98A8] dark:text-[#6C8A9B] truncate w-full text-center">
+                            Poulet
+                          </span>
+                        </div>
+
+                        {/* Bar 3: Vegetables */}
+                        <div className="flex-1 flex flex-col items-center gap-2">
+                          <span className="text-xs font-bold text-[#10B981] dark:text-[#34D399] tabular-nums">
+                            {stats.categoryCounts.vegetables}
+                          </span>
+                          <div
+                            className="w-full max-w-[32px] bg-[#10B981] rounded-t-xl transition-all duration-700"
+                            style={{
+                              height: `${Math.max(
+                                18,
+                                ((stats.categoryCounts.vegetables || 0) /
+                                  Math.max(1, stats.totalProducts)) *
+                                  100
+                              )}px`,
+                            }}
+                          ></div>
+                          <span className="text-[10px] font-semibold text-[#7A98A8] dark:text-[#6C8A9B] truncate w-full text-center">
+                            Légumes
+                          </span>
+                        </div>
+
+                        {/* Bar 4: Orders Activity */}
+                        <div className="flex-1 flex flex-col items-center gap-2">
+                          <span className="text-xs font-bold text-indigo-500 tabular-nums">
+                            {stats.totalOrders}
+                          </span>
+                          <div
+                            className="w-full max-w-[32px] bg-indigo-500 rounded-t-xl transition-all duration-700"
+                            style={{ height: '42px' }}
+                          ></div>
+                          <span className="text-[10px] font-semibold text-[#7A98A8] dark:text-[#6C8A9B] truncate w-full text-center">
+                            Ventes
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right Card: Recent Orders / Reviews (SON YAPILAN YORUMLAR in design) */}
+                  <div className="lg:col-span-5 bg-white dark:bg-[#12222B] rounded-[28px] border border-[#E1EDF3] dark:border-[#1E3444] p-6 space-y-4 shadow-xs flex flex-col justify-between">
+                    <div className="flex items-center justify-between pb-2 border-b border-[#EDF4F8] dark:border-[#1E3444]">
+                      <div>
+                        <h2 className="font-display font-bold text-base text-[#132E3F] dark:text-[#EEF6FA]">
+                          DERNIÈRES COMMANDES
+                        </h2>
+                        <div className="text-[11px] text-[#7A98A8] dark:text-[#6C8A9B]">
+                          Commandes récentes des clients
+                        </div>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => setActiveTab('orders')}
+                        className="text-xs font-bold text-[#0284C7] hover:underline flex items-center gap-1"
+                      >
+                        <span>Tout voir</span>
+                        <ChevronRight className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+
+                    {/* Orders List */}
+                    <div className="space-y-3.5 flex-1 overflow-y-auto max-h-[280px] pe-1">
+                      {orders.length === 0 ? (
+                        <div className="py-12 text-center text-xs text-[#7A98A8] space-y-2">
+                          <ShoppingCart className="w-8 h-8 text-[#CFE0EB] mx-auto" />
+                          <p>Aucune commande enregistrée pour le moment.</p>
+                        </div>
+                      ) : (
+                        orders.slice(0, 4).map((ord) => {
+                          const initials = ord.customer_name
+                            ? ord.customer_name
+                                .split(' ')
+                                .map((n) => n[0])
+                                .join('')
+                                .toUpperCase()
+                                .slice(0, 2)
+                            : 'CL';
+                          return (
+                            <div
+                              key={ord.id}
+                              onClick={() => setActiveTab('orders')}
+                              className="p-3.5 rounded-2xl bg-[#F8FBFD] dark:bg-[#0E1A22] border border-[#E8F1F6] dark:border-[#1A2E3B] hover:border-[#0284C7]/40 cursor-pointer transition-all space-y-2"
+                            >
+                              <div className="flex items-center justify-between gap-3">
+                                <div className="flex items-center gap-3 min-w-0">
+                                  <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-[#0284C7] to-[#38BDF8] text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-xs">
+                                    {initials}
+                                  </div>
+                                  <div className="min-w-0">
+                                    <div className="text-xs font-bold text-[#132E3F] dark:text-[#EEF6FA] truncate">
+                                      {ord.customer_name}
+                                    </div>
+                                    <div className="text-[10px] text-[#7A98A8] truncate">
+                                      {ord.city} · {new Date(ord.created_at).toLocaleDateString()}
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <div className="text-end shrink-0">
+                                  <div className="text-xs font-extrabold text-[#0284C7] dark:text-[#38BDF8] tabular-nums">
+                                    {formatMad(ord.total_mad, lang)}
+                                  </div>
+                                  <span
+                                    className={`inline-block px-2 py-0.5 rounded text-[10px] font-semibold mt-0.5 ${ORDER_STATUS_STYLES[ord.status]}`}
+                                  >
+                                    {ord.status}
+                                  </span>
+                                </div>
+                              </div>
+
+                              {/* Order items note */}
+                              {ord.items && ord.items.length > 0 && (
+                                <div className="text-[11px] text-[#5A7888] dark:text-[#8AA4B4] bg-white dark:bg-[#12222B] px-2.5 py-1.5 rounded-xl border border-[#EDF4F8] dark:border-[#1E3444] truncate">
+                                  {ord.items.map((it) => `${it.quantity}× ${it.name}`).join(', ')}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Bottom Row: 4 Vibrant Gradient Action Cards (PUSULA / Quick Navigation in screenshot) */}
+                <div className="space-y-3 pt-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#7A98A8] dark:text-[#6C8A9B]">
+                      <span>ACCÈS RAPIDE AUX MODULES</span>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {/* Card 1: Cyan / Emerald Gradient */}
+                    <div
+                      onClick={() => setActiveTab('products')}
+                      className="group cursor-pointer p-5 rounded-[24px] bg-gradient-to-br from-[#00C9A7] via-[#00BFA5] to-[#0096C7] text-white shadow-md shadow-emerald-500/15 hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all flex flex-col justify-between h-36"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="w-10 h-10 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center">
+                          <Package className="w-5 h-5 text-white" />
+                        </div>
+                        <ArrowRight className="w-4 h-4 text-white/70 group-hover:translate-x-1 transition-transform" />
+                      </div>
+                      <div>
+                        <div className="font-display font-bold text-sm tracking-wide">
+                          Catalogue Produits
+                        </div>
+                        <div className="text-xs text-white/80 mt-0.5">
+                          {stats.totalProducts} produits en ligne
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Card 2: Pink / Magenta / Rose Gradient */}
+                    <div
+                      onClick={() => setActiveTab('orders')}
+                      className="group cursor-pointer p-5 rounded-[24px] bg-gradient-to-br from-[#FF577F] via-[#FF4071] to-[#E0245E] text-white shadow-md shadow-rose-500/15 hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all flex flex-col justify-between h-36"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="w-10 h-10 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center">
+                          <ShoppingCart className="w-5 h-5 text-white" />
+                        </div>
+                        <ArrowRight className="w-4 h-4 text-white/70 group-hover:translate-x-1 transition-transform" />
+                      </div>
+                      <div>
+                        <div className="font-display font-bold text-sm tracking-wide">
+                          Commandes Clients
+                        </div>
+                        <div className="text-xs text-white/80 mt-0.5">
+                          {stats.totalOrders} commandes passées
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Card 3: Royal Blue / Indigo Gradient */}
+                    <div
+                      onClick={() => setActiveTab('content')}
+                      className="group cursor-pointer p-5 rounded-[24px] bg-gradient-to-br from-[#2563EB] via-[#1D4ED8] to-[#1E40AF] text-white shadow-md shadow-blue-500/15 hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all flex flex-col justify-between h-36"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="w-10 h-10 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center">
+                          <Sliders className="w-5 h-5 text-white" />
+                        </div>
+                        <ArrowRight className="w-4 h-4 text-white/70 group-hover:translate-x-1 transition-transform" />
+                      </div>
+                      <div>
+                        <div className="font-display font-bold text-sm tracking-wide">
+                          Contenu &amp; Contacts
+                        </div>
+                        <div className="text-xs text-white/80 mt-0.5">
+                          Textes, livraison &amp; EmailJS
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Card 4: Sky / Cyan Gradient */}
+                    <div
+                      onClick={() => setActiveTab('sql')}
+                      className="group cursor-pointer p-5 rounded-[24px] bg-gradient-to-br from-[#06B6D4] via-[#0284C7] to-[#0369A1] text-white shadow-md shadow-cyan-500/15 hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all flex flex-col justify-between h-36"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="w-10 h-10 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center">
+                          <Database className="w-5 h-5 text-white" />
+                        </div>
+                        <ArrowRight className="w-4 h-4 text-white/70 group-hover:translate-x-1 transition-transform" />
+                      </div>
+                      <div>
+                        <div className="font-display font-bold text-sm tracking-wide">
+                          Supabase SQL
+                        </div>
+                        <div className="text-xs text-white/80 mt-0.5">
+                          Base de données connectée
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
-        </div>
-      )}
+            )}
 
       {/* PRODUCTS TAB */}
       {activeTab === 'products' && (
@@ -1975,6 +2379,8 @@ export function AdminPage() {
 
       {/* SQL EDITOR & SUPABASE TAB */}
       {activeTab === 'sql' && <AdminSqlEditor adminToken={adminToken} showToast={showToast} />}
+          </main>
+        </div>
       </div>
     </div>
   );
