@@ -1,6 +1,9 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
+  Calendar,
   Check,
+  ChevronLeft,
+  ChevronRight,
   Edit3,
   Lock,
   LogOut,
@@ -146,6 +149,9 @@ export function AdminPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<'all' | ProductCategory>('all');
   const [orderStatusFilter, setOrderStatusFilter] = useState<'all' | OrderStatus>('all');
+  const [orderYearFilter, setOrderYearFilter] = useState<string>('all');
+  const [orderPage, setOrderPage] = useState<number>(1);
+  const ordersPerPage = 10;
 
   const [showProductForm, setShowProductForm] = useState(false);
   const [productForm, setProductForm] = useState<ProductFormState>(EMPTY_PRODUCT_FORM);
@@ -566,10 +572,41 @@ export function AdminPage() {
     });
   }, [adminProducts, categoryFilter, searchQuery]);
 
+  const availableOrderYears = useMemo(() => {
+    const years = new Set<string>();
+    orders.forEach((o) => {
+      if (o.created_at) {
+        const d = new Date(o.created_at);
+        if (!isNaN(d.getTime())) {
+          years.add(String(d.getFullYear()));
+        }
+      }
+    });
+    return Array.from(years).sort((a, b) => Number(b) - Number(a));
+  }, [orders]);
+
   const filteredOrders = useMemo(() => {
-    if (orderStatusFilter === 'all') return orders;
-    return orders.filter((o) => o.status === orderStatusFilter);
-  }, [orders, orderStatusFilter]);
+    return orders.filter((o) => {
+      if (orderStatusFilter !== 'all' && o.status !== orderStatusFilter) {
+        return false;
+      }
+      if (orderYearFilter !== 'all') {
+        const d = o.created_at ? new Date(o.created_at) : null;
+        if (!d || isNaN(d.getTime()) || String(d.getFullYear()) !== orderYearFilter) {
+          return false;
+        }
+      }
+      return true;
+    });
+  }, [orders, orderStatusFilter, orderYearFilter]);
+
+  const totalOrderPages = Math.max(1, Math.ceil(filteredOrders.length / ordersPerPage));
+  const currentPage = Math.min(orderPage, totalOrderPages);
+
+  const paginatedOrders = useMemo(() => {
+    const start = (currentPage - 1) * ordersPerPage;
+    return filteredOrders.slice(start, start + ordersPerPage);
+  }, [filteredOrders, currentPage, ordersPerPage]);
 
   if (authChecking) {
     return (
@@ -1241,31 +1278,79 @@ export function AdminPage() {
       {/* ORDERS TAB */}
       {activeTab === 'orders' && (
         <div className="space-y-6">
-          <div className="flex flex-wrap gap-2">
-            {(
-              [
-                'all',
-                'pending',
-                'confirmed',
-                'preparing',
-                'shipped',
-                'completed',
-                'cancelled',
-              ] as const
-            ).map((statusKey) => (
-              <button
-                key={statusKey}
-                type="button"
-                onClick={() => setOrderStatusFilter(statusKey)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${
-                  orderStatusFilter === statusKey
-                    ? 'bg-[#0E3B22] text-white border-[#0E3B22]'
-                    : 'bg-white text-[#4A5D52] border-[#DCE8DF]'
-                }`}
-              >
-                {statusKey}
-              </button>
-            ))}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex flex-wrap gap-2">
+              {(
+                [
+                  'all',
+                  'pending',
+                  'confirmed',
+                  'preparing',
+                  'shipped',
+                  'completed',
+                  'cancelled',
+                ] as const
+              ).map((statusKey) => (
+                <button
+                  key={statusKey}
+                  type="button"
+                  onClick={() => {
+                    setOrderStatusFilter(statusKey);
+                    setOrderPage(1);
+                  }}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${
+                    orderStatusFilter === statusKey
+                      ? 'bg-[#0E3B22] text-white border-[#0E3B22]'
+                      : 'bg-white text-[#4A5D52] border-[#DCE8DF]'
+                  }`}
+                >
+                  {statusKey}
+                </button>
+              ))}
+            </div>
+
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5 text-xs font-semibold text-[#516358]">
+                <Calendar className="w-4 h-4 text-[#2E7D47]" />
+                <span>Année :</span>
+              </div>
+              <div className="flex items-center gap-1.5 bg-white border border-[#DCE8DF] rounded-lg p-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setOrderYearFilter('all');
+                    setOrderPage(1);
+                  }}
+                  className={`px-2.5 py-1 rounded text-xs font-semibold transition-colors ${
+                    orderYearFilter === 'all'
+                      ? 'bg-[#0E3B22] text-white shadow-xs'
+                      : 'text-[#4A5D52] hover:text-[#0E3B22]'
+                  }`}
+                >
+                  Toutes
+                </button>
+                {(availableOrderYears.length > 0
+                  ? availableOrderYears
+                  : [String(new Date().getFullYear())]
+                ).map((yr) => (
+                  <button
+                    key={yr}
+                    type="button"
+                    onClick={() => {
+                      setOrderYearFilter(yr);
+                      setOrderPage(1);
+                    }}
+                    className={`px-2.5 py-1 rounded text-xs font-semibold transition-colors ${
+                      orderYearFilter === yr
+                        ? 'bg-[#0E3B22] text-white shadow-xs'
+                        : 'text-[#4A5D52] hover:text-[#0E3B22]'
+                    }`}
+                  >
+                    {yr}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
 
           <div className="bg-white rounded-xl border border-[#DCE8DF] overflow-x-auto">
@@ -1281,90 +1366,156 @@ export function AdminPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#DCE8DF]/70">
-                {filteredOrders.map((ord) => (
-                  <tr key={ord.id} className="align-top">
-                    <td className="py-3.5 px-4">
-                      <div className="font-mono text-xs font-semibold tabular-nums">{ord.id}</div>
-                      <div className="text-xs text-[#516358] mt-0.5">
-                        {new Date(ord.created_at).toLocaleDateString()}
-                      </div>
-                    </td>
-                    <td className="py-3.5 px-4 space-y-0.5">
-                      <div className="font-semibold text-[#0F2418]">{ord.customer_name}</div>
-                      <div className="text-xs text-[#4A5D52] font-mono tabular-nums" dir="ltr">
-                        {ord.customer_phone}
-                      </div>
-                      <div className="text-xs text-[#516358]">
-                        {ord.city} · {ord.address}
-                      </div>
-                    </td>
-                    <td className="py-3.5 px-4">
-                      <ul className="space-y-1 text-xs text-[#4A5D52]">
-                        {ord.items.map((it, idx) => (
-                          <li key={idx}>
-                            {it.quantity} × {it.name}
-                            {it.variantLabel ? ` (${it.variantLabel})` : ''}
-                          </li>
-                        ))}
-                      </ul>
-                    </td>
-                    <td className="py-3.5 px-4 space-y-1">
-                      <span
-                        className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${
-                          ord.email_status === 'sent'
-                            ? 'bg-emerald-100 text-emerald-900'
-                            : ord.email_status === 'failed'
-                              ? 'bg-red-100 text-red-900'
-                              : 'bg-amber-100 text-amber-900'
-                        }`}
-                      >
-                        {ord.email_status === 'sent'
-                          ? 'Sent'
-                          : ord.email_status === 'failed'
-                            ? 'Failed'
-                            : ord.email_status === 'pending_smtp'
-                              ? 'Pending SMTP'
-                              : 'Pending EmailJS'}
-                      </span>
-                      <div className="text-xs text-[#516358] font-mono" dir="ltr">
-                        {ord.email_recipient || 'domaineessaoudi@gmail.com'}
-                      </div>
-                    </td>
-                    <td className="py-3.5 px-4 text-end font-bold tabular-nums">
-                      {formatMad(ord.total_mad, lang)}
-                    </td>
-                    <td className="py-3.5 px-4">
-                      <div className="flex items-center gap-2">
-                        <select
-                          value={ord.status}
-                          aria-label={`Order status for ${ord.id}`}
-                          onChange={(e) =>
-                            handleOrderStatusChange(ord.id, e.target.value as OrderStatus)
-                          }
-                          className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-[#DCE8DF] ${ORDER_STATUS_STYLES[ord.status]}`}
-                        >
-                          <option value="pending">pending</option>
-                          <option value="confirmed">confirmed</option>
-                          <option value="preparing">preparing</option>
-                          <option value="shipped">shipped</option>
-                          <option value="completed">completed</option>
-                          <option value="cancelled">cancelled</option>
-                        </select>
-                        <button
-                          type="button"
-                          aria-label={`Delete order ${ord.id}`}
-                          onClick={() => handleDeleteOrder(ord.id)}
-                          className="p-1.5 rounded-lg border border-[#DCE8DF] hover:bg-red-50 text-[#9E2A2B]"
-                        >
-                          <Trash2 className="w-4 h-4" aria-hidden="true" />
-                        </button>
-                      </div>
+                {paginatedOrders.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="py-12 text-center text-sm text-[#516358]">
+                      Aucune commande trouvée pour ces critères.
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  paginatedOrders.map((ord) => (
+                    <tr key={ord.id} className="align-top">
+                      <td className="py-3.5 px-4">
+                        <div className="font-mono text-xs font-semibold tabular-nums">{ord.id}</div>
+                        <div className="text-xs text-[#516358] mt-0.5">
+                          {new Date(ord.created_at).toLocaleDateString()}
+                        </div>
+                      </td>
+                      <td className="py-3.5 px-4 space-y-0.5">
+                        <div className="font-semibold text-[#0F2418]">{ord.customer_name}</div>
+                        <div className="text-xs text-[#4A5D52] font-mono tabular-nums" dir="ltr">
+                          {ord.customer_phone}
+                        </div>
+                        <div className="text-xs text-[#516358]">
+                          {ord.city} · {ord.address}
+                        </div>
+                      </td>
+                      <td className="py-3.5 px-4">
+                        <ul className="space-y-1 text-xs text-[#4A5D52]">
+                          {ord.items.map((it, idx) => (
+                            <li key={idx}>
+                              {it.quantity} × {it.name}
+                              {it.variantLabel ? ` (${it.variantLabel})` : ''}
+                            </li>
+                          ))}
+                        </ul>
+                      </td>
+                      <td className="py-3.5 px-4 space-y-1">
+                        <span
+                          className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${
+                            ord.email_status === 'sent'
+                              ? 'bg-emerald-100 text-emerald-900'
+                              : ord.email_status === 'failed'
+                                ? 'bg-red-100 text-red-900'
+                                : 'bg-amber-100 text-amber-900'
+                          }`}
+                        >
+                          {ord.email_status === 'sent'
+                            ? 'Sent'
+                            : ord.email_status === 'failed'
+                              ? 'Failed'
+                              : ord.email_status === 'pending_smtp'
+                                ? 'Pending SMTP'
+                                : 'Pending EmailJS'}
+                        </span>
+                        <div className="text-xs text-[#516358] font-mono" dir="ltr">
+                          {ord.email_recipient || 'domaineessaoudi@gmail.com'}
+                        </div>
+                      </td>
+                      <td className="py-3.5 px-4 text-end font-bold tabular-nums">
+                        {formatMad(ord.total_mad, lang)}
+                      </td>
+                      <td className="py-3.5 px-4">
+                        <div className="flex items-center gap-2">
+                          <select
+                            value={ord.status}
+                            aria-label={`Order status for ${ord.id}`}
+                            onChange={(e) =>
+                              handleOrderStatusChange(ord.id, e.target.value as OrderStatus)
+                            }
+                            className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-[#DCE8DF] ${ORDER_STATUS_STYLES[ord.status]}`}
+                          >
+                            <option value="pending">pending</option>
+                            <option value="confirmed">confirmed</option>
+                            <option value="preparing">preparing</option>
+                            <option value="shipped">shipped</option>
+                            <option value="completed">completed</option>
+                            <option value="cancelled">cancelled</option>
+                          </select>
+                          <button
+                            type="button"
+                            aria-label={`Delete order ${ord.id}`}
+                            onClick={() => handleDeleteOrder(ord.id)}
+                            className="p-1.5 rounded-lg border border-[#DCE8DF] hover:bg-red-50 text-[#9E2A2B]"
+                          >
+                            <Trash2 className="w-4 h-4" aria-hidden="true" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
+
+          {filteredOrders.length > 0 && (
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-4 py-3 bg-white rounded-xl border border-[#DCE8DF]">
+              <div className="text-xs text-[#516358]">
+                Affichage de{' '}
+                <span className="font-semibold text-[#0F2418]">
+                  {(currentPage - 1) * ordersPerPage + 1}
+                </span>{' '}
+                à{' '}
+                <span className="font-semibold text-[#0F2418]">
+                  {Math.min(currentPage * ordersPerPage, filteredOrders.length)}
+                </span>{' '}
+                sur <span className="font-semibold text-[#0F2418]">{filteredOrders.length}</span>{' '}
+                commandes
+              </div>
+
+              {totalOrderPages > 1 && (
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => setOrderPage((p) => Math.max(1, p - 1))}
+                    disabled={currentPage === 1}
+                    aria-label="Page précédente"
+                    className="p-1.5 rounded-lg border border-[#DCE8DF] bg-white text-[#4A5D52] hover:bg-[#F2F7F4] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+
+                  <div className="flex items-center gap-1">
+                    {Array.from({ length: totalOrderPages }, (_, i) => i + 1).map((pg) => (
+                      <button
+                        key={pg}
+                        type="button"
+                        onClick={() => setOrderPage(pg)}
+                        className={`w-7 h-7 rounded-lg text-xs font-semibold border transition-colors ${
+                          currentPage === pg
+                            ? 'bg-[#0E3B22] text-white border-[#0E3B22]'
+                            : 'bg-white text-[#4A5D52] border-[#DCE8DF] hover:bg-[#F2F7F4]'
+                        }`}
+                      >
+                        {pg}
+                      </button>
+                    ))}
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setOrderPage((p) => Math.min(totalOrderPages, p + 1))}
+                    disabled={currentPage === totalOrderPages}
+                    aria-label="Page suivante"
+                    className="p-1.5 rounded-lg border border-[#DCE8DF] bg-white text-[#4A5D52] hover:bg-[#F2F7F4] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       )}
 

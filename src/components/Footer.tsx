@@ -1,5 +1,5 @@
 import React from 'react';
-import { Mail, MapPin, MessageCircle, ShieldCheck, Sprout } from 'lucide-react';
+import { Mail, MapPin, MessageCircle, Sprout } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import {
   DEFAULT_FACEBOOK_URL,
@@ -176,19 +176,8 @@ export function Footer() {
       </div>
 
       <div className="border-t border-[#15452A]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#91B09D]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex items-center justify-center text-xs text-[#91B09D]">
           <span>{t.footer.copyright}</span>
-          <a
-            href="/admin"
-            onClick={(e) => {
-              e.preventDefault();
-              navigate('/admin');
-            }}
-            className="inline-flex items-center gap-1.5 text-[#B7CEC0] hover:text-white transition-colors"
-          >
-            <ShieldCheck className="w-3.5 h-3.5" aria-hidden="true" />
-            <span>{t.footer.adminPortal}</span>
-          </a>
         </div>
       </div>
     </footer>
