@@ -975,7 +975,7 @@ export function AdminPage() {
             {/* Prominent Pill CTA: VOIR WEB SITE (From image design) */}
             <button
               type="button"
-              onClick={() => navigate('/')}
+              onClick={() => window.open('/', '_blank', 'noopener,noreferrer')}
               className="bg-gradient-to-r from-[#00C9A7] to-[#00A887] hover:from-[#00B899] hover:to-[#00987A] text-white font-bold text-xs uppercase tracking-wider px-4 sm:px-5 py-2 sm:py-2.5 rounded-full shadow-md shadow-emerald-500/20 hover:shadow-lg flex items-center gap-2 transition-all hover:scale-[1.02] active:scale-[0.98]"
               title="Retourner à la boutique publique"
             >
