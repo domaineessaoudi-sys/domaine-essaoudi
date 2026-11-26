@@ -1,7 +1,8 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ArrowRight,
   Bell,
+  BellRing,
   Box,
   Calendar,
   Check,
@@ -36,6 +37,7 @@ import {
   TrendingUp,
   Upload,
   User,
+  X,
   Zap,
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
@@ -140,7 +142,7 @@ const ORDER_STATUS_STYLES: Record<OrderStatus, string> = {
   confirmed: 'bg-sky-100 text-sky-900',
   preparing: 'bg-indigo-100 text-indigo-900',
   shipped: 'bg-emerald-100 text-emerald-900',
-  completed: 'bg-[#0E3B22]/15 text-[#082716]',
+  completed: 'bg-[#0E3B22]/15 text-[#fff]',
   cancelled: 'bg-red-100 text-red-900',
 };
 
@@ -178,6 +180,46 @@ export function AdminPage() {
   const [orderPage, setOrderPage] = useState<number>(1);
   const ordersPerPage = 10;
   const darkMode = true;
+
+  // ---- Notification bell state ----
+  const [notifOpen, setNotifOpen] = useState(false);
+  const notifRef = useRef<HTMLDivElement>(null);
+  // Track order IDs we've already seen so we can detect "new" ones
+  const [seenOrderIds, setSeenOrderIds] = useState<Set<string>>(() => {
+    try {
+      const stored = localStorage.getItem('admin_seen_order_ids');
+      return stored ? new Set(JSON.parse(stored) as string[]) : new Set();
+    } catch {
+      return new Set();
+    }
+  });
+
+  // Pending orders that the admin hasn't seen yet
+  const newOrders = useMemo(() =>
+    orders.filter((o) => o.status === 'pending' && !seenOrderIds.has(o.id)),
+    [orders, seenOrderIds]
+  );
+
+  const totalNotifCount = newOrders.length + (stats?.unreadMessages ?? 0);
+
+  const markAllSeen = () => {
+    const updated = new Set([...seenOrderIds, ...newOrders.map((o) => o.id)]);
+    setSeenOrderIds(updated);
+    try {
+      localStorage.setItem('admin_seen_order_ids', JSON.stringify([...updated]));
+    } catch { /* ignore */ }
+  };
+
+  // Close panel on outside click
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
+        setNotifOpen(false);
+      }
+    };
+    if (notifOpen) document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [notifOpen]);
 
   const [showProductForm, setShowProductForm] = useState(false);
   const [productForm, setProductForm] = useState<ProductFormState>(EMPTY_PRODUCT_FORM);
@@ -773,20 +815,146 @@ export function AdminPage() {
 
           {/* Right Area: Alerts, User greeting, CTA "VOIR WEB SITE", Logout */}
           <div className="flex items-center gap-2 sm:gap-4 shrink-0">
-            {/* Notification Bell */}
-            <div className="relative">
+            {/* ===== Notification Bell ===== */}
+            <div className="relative" ref={notifRef}>
               <button
                 type="button"
-                onClick={() => setActiveTab('content')}
-                className="w-10 h-10 rounded-full flex items-center justify-center text-[#7A98A8] hover:text-[#38BDF8] hover:bg-[#152530] transition-colors relative"
-                title="Messages et alertes"
-                aria-label="Alertes"
+                onClick={() => {
+                  setNotifOpen((v) => !v);
+                  if (!notifOpen) markAllSeen();
+                }}
+                className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors relative ${totalNotifCount > 0
+                  ? 'text-amber-400 hover:bg-amber-500/10 hover:text-amber-300'
+                  : 'text-[#7A98A8] hover:text-[#38BDF8] hover:bg-[#152530]'
+                  }`}
+                title="Notifications"
+                aria-label="Notifications"
               >
-                <Bell className="w-5 h-5" />
-                {stats && stats.unreadMessages > 0 && (
-                  <span className="absolute top-2 end-2 w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+                {totalNotifCount > 0
+                  ? <BellRing className="w-5 h-5 animate-[wiggle_1s_ease-in-out_infinite]" />
+                  : <Bell className="w-5 h-5" />}
+
+                {/* Count badge */}
+                {totalNotifCount > 0 && (
+                  <span className="absolute -top-0.5 -end-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center shadow-md animate-pulse leading-none">
+                    {totalNotifCount > 9 ? '9+' : totalNotifCount}
+                  </span>
                 )}
               </button>
+
+              {/* ===== Notification Dropdown Panel ===== */}
+              {notifOpen && (
+                <div className="absolute end-0 top-12 w-80 sm:w-96 bg-[#0D171F] border border-[#1E3444] rounded-2xl shadow-2xl shadow-black/60 z-50 overflow-hidden">
+                  {/* Header */}
+                  <div className="flex items-center justify-between px-4 py-3 border-b border-[#1E3444]">
+                    <div className="flex items-center gap-2">
+                      <BellRing className="w-4 h-4 text-amber-400" />
+                      <span className="text-sm font-bold text-[#EEF6FA]">Notifications</span>
+                      {totalNotifCount > 0 && (
+                        <span className="px-1.5 py-0.5 rounded-full bg-red-500/20 border border-red-500/30 text-red-400 text-[10px] font-bold">
+                          {totalNotifCount}
+                        </span>
+                      )}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setNotifOpen(false)}
+                      className="text-[#7A98A8] hover:text-[#EEF6FA] p-1 rounded-lg hover:bg-[#162833] transition-colors"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+
+                  <div className="max-h-80 overflow-y-auto divide-y divide-[#1A2E3B]">
+                    {/* New Pending Orders */}
+                    {newOrders.length > 0 && newOrders.slice(0, 5).map((ord) => (
+                      <button
+                        key={ord.id}
+                        type="button"
+                        onClick={() => {
+                          setActiveTab('orders');
+                          setNotifOpen(false);
+                        }}
+                        className="w-full text-start px-4 py-3 hover:bg-[#162833] transition-colors"
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className="w-8 h-8 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center shrink-0 mt-0.5">
+                            <ShoppingCart className="w-4 h-4 text-amber-400" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 justify-between">
+                              <span className="text-xs font-bold text-[#EEF6FA] truncate">
+                                Nouvelle commande
+                              </span>
+                              <span className="text-[10px] text-[#7A98A8] shrink-0 tabular-nums">
+                                {new Date(ord.created_at).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })}
+                              </span>
+                            </div>
+                            <p className="text-[11px] text-amber-300 font-semibold mt-0.5 truncate">
+                              {ord.customer_name} — {formatMad(ord.total_mad, lang)}
+                            </p>
+                            <p className="text-[11px] text-[#7A98A8] truncate">
+                              {ord.items.length} article{ord.items.length > 1 ? 's' : ''} · {ord.city}
+                            </p>
+                          </div>
+                        </div>
+                      </button>
+                    ))}
+
+                    {/* Unread Messages */}
+                    {messages.filter((m) => m.status === 'unread').slice(0, 3).map((m) => (
+                      <button
+                        key={m.id}
+                        type="button"
+                        onClick={() => {
+                          setActiveTab('content');
+                          setNotifOpen(false);
+                        }}
+                        className="w-full text-start px-4 py-3 hover:bg-[#162833] transition-colors"
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className="w-8 h-8 rounded-xl bg-sky-500/15 border border-sky-500/30 flex items-center justify-center shrink-0 mt-0.5">
+                            <MessageSquare className="w-4 h-4 text-sky-400" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 justify-between">
+                              <span className="text-xs font-bold text-[#EEF6FA] truncate">
+                                Message de {m.name}
+                              </span>
+                              <span className="w-2 h-2 rounded-full bg-sky-500 shrink-0 mt-0.5 animate-pulse"></span>
+                            </div>
+                            <p className="text-[11px] text-[#C5D9E5] mt-0.5 truncate">{m.subject}</p>
+                            <p className="text-[11px] text-[#7A98A8] truncate">{m.message}</p>
+                          </div>
+                        </div>
+                      </button>
+                    ))}
+
+                    {totalNotifCount === 0 && (
+                      <div className="px-4 py-8 text-center">
+                        <div className="w-12 h-12 rounded-2xl bg-[#12222B] border border-[#1E3444] flex items-center justify-center mx-auto mb-3">
+                          <Bell className="w-5 h-5 text-[#7A98A8]" />
+                        </div>
+                        <p className="text-xs font-semibold text-[#EEF6FA]">Tout est à jour</p>
+                        <p className="text-[11px] text-[#7A98A8] mt-1">Aucune nouvelle commande ou message</p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Footer actions */}
+                  {totalNotifCount > 0 && (
+                    <div className="border-t border-[#1E3444] p-3 flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => { setActiveTab('orders'); setNotifOpen(false); }}
+                        className="flex-1 py-2 text-xs font-semibold rounded-xl bg-[#12222B] border border-[#1E3444] text-[#EEF6FA] hover:bg-[#162833] transition-colors"
+                      >
+                        Voir toutes les commandes
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* User Greeting & Avatar */}
@@ -989,26 +1157,6 @@ export function AdminPage() {
                         <p className="text-xs text-[#7A98A8] dark:text-[#6C8A9B] mt-0.5">
                           Distribution des produits par filière agricole
                         </p>
-                      </div>
-                      <div className="flex items-center gap-1 bg-white dark:bg-[#0B151C] p-1 rounded-xl border border-[#E1EDF3] dark:border-[#1E3444] text-xs font-semibold">
-                        <button
-                          type="button"
-                          className="px-3 py-1 rounded-lg bg-[#0284C7] text-white shadow-xs"
-                        >
-                          Total
-                        </button>
-                        <button
-                          type="button"
-                          className="px-3 py-1 rounded-lg text-[#7A98A8] hover:text-[#0284C7]"
-                        >
-                          Hebdo
-                        </button>
-                        <button
-                          type="button"
-                          className="px-3 py-1 rounded-lg text-[#7A98A8] hover:text-[#0284C7]"
-                        >
-                          Mois
-                        </button>
                       </div>
                     </div>
 
