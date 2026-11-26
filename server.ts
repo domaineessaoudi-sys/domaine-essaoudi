@@ -706,15 +706,32 @@ app.patch('/api/admin/messages/:id', requireAdmin, async (req, res) => {
 });
 
 // ─────────────────────────────────────────────────────────────
-// Admin Users CRUD — table: admin_auth
+// Admin Users CRUD — table: admin_auth (extended with username/email/role)
 // ─────────────────────────────────────────────────────────────
+
+// Auto-migrate: add missing columns to admin_auth if they don't exist yet
+async function ensureAdminAuthColumns() {
+  const alterSql = `
+    ALTER TABLE admin_auth
+      ADD COLUMN IF NOT EXISTS username TEXT,
+      ADD COLUMN IF NOT EXISTS email TEXT,
+      ADD COLUMN IF NOT EXISTS role TEXT NOT NULL DEFAULT 'admin',
+      ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT NOW();
+  `;
+  try {
+    await executeSqlQuery({ target: 'supabase', sql: alterSql });
+  } catch {
+    // ignore if already exists or no permission
+  }
+}
 
 // List all users from admin_auth table
 app.get('/api/admin/users', requireAdmin, async (_req, res) => {
   try {
+    await ensureAdminAuthColumns();
     const result = await executeSqlQuery({
       target: 'supabase',
-      sql: "SELECT id, username, email, role, created_at, updated_at FROM admin_auth ORDER BY created_at DESC;",
+      sql: "SELECT id, COALESCE(username, 'admin') as username, COALESCE(email, '') as email, COALESCE(role, 'admin') as role, COALESCE(created_at, updated_at) as created_at, updated_at FROM admin_auth ORDER BY id DESC;",
     });
     res.json({ users: result.rows || [] });
   } catch (err) {
@@ -725,9 +742,10 @@ app.get('/api/admin/users', requireAdmin, async (_req, res) => {
 // Create user
 app.post('/api/admin/users', requireAdmin, async (req, res) => {
   try {
+    await ensureAdminAuthColumns();
     const { username, email, password, role } = req.body || {};
     if (!username || typeof username !== 'string' || username.trim().length < 2) {
-      res.status(400).json({ error: 'Nom d\'utilisateur requis (min 2 caractères).' });
+      res.status(400).json({ error: "Nom d'utilisateur requis (min 2 caractères)." });
       return;
     }
     if (!password || typeof password !== 'string' || password.length < 6) {
@@ -744,7 +762,7 @@ app.post('/api/admin/users', requireAdmin, async (req, res) => {
       target: 'supabase',
       sql: `INSERT INTO admin_auth (username, email, password_hash, salt, role, created_at, updated_at)
             VALUES ('${safeUsername}', '${safeEmail}', '${passwordHash}', '${salt}', '${safeRole}', NOW(), NOW())
-            RETURNING id, username, email, role, created_at, updated_at;`,
+            RETURNING id, COALESCE(username,'admin') as username, COALESCE(email,'') as email, COALESCE(role,'admin') as role, created_at, updated_at;`,
     });
     res.json({ user: result.rows?.[0] || null });
   } catch (err) {
@@ -778,11 +796,16 @@ app.patch('/api/admin/users/:id', requireAdmin, async (req, res) => {
       return;
     }
     setParts.push(`updated_at = NOW()`);
-    const safeId = String(id).replace(/[^a-zA-Z0-9_-]/g, '');
+    // id is int4 — use numeric cast
+    const numericId = parseInt(String(id), 10);
+    if (isNaN(numericId)) {
+      res.status(400).json({ error: 'ID invalide.' });
+      return;
+    }
     const result = await executeSqlQuery({
       target: 'supabase',
-      sql: `UPDATE admin_auth SET ${setParts.join(', ')} WHERE id = '${safeId}'
-            RETURNING id, username, email, role, created_at, updated_at;`,
+      sql: `UPDATE admin_auth SET ${setParts.join(', ')} WHERE id = ${numericId}
+            RETURNING id, COALESCE(username,'admin') as username, COALESCE(email,'') as email, COALESCE(role,'admin') as role, COALESCE(created_at, updated_at) as created_at, updated_at;`,
     });
     if (!result.rows?.length) {
       res.status(404).json({ error: 'Utilisateur introuvable.' });
@@ -797,10 +820,14 @@ app.patch('/api/admin/users/:id', requireAdmin, async (req, res) => {
 // Delete user
 app.delete('/api/admin/users/:id', requireAdmin, async (req, res) => {
   try {
-    const safeId = String(req.params.id).replace(/[^a-zA-Z0-9_-]/g, '');
+    const numericId = parseInt(String(req.params.id), 10);
+    if (isNaN(numericId)) {
+      res.status(400).json({ error: 'ID invalide.' });
+      return;
+    }
     await executeSqlQuery({
       target: 'supabase',
-      sql: `DELETE FROM admin_auth WHERE id = '${safeId}';`,
+      sql: `DELETE FROM admin_auth WHERE id = ${numericId};`,
     });
     res.json({ ok: true });
   } catch (err) {

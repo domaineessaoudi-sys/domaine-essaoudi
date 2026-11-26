@@ -2770,17 +2770,13 @@ export function AdminPage() {
 
                 {/* SQL hint */}
                 <div className="rounded-xl border border-[#1E3444]/60 bg-[#0B151C]/60 p-4 text-xs text-[#4A6878]">
-                  <p className="font-semibold text-[#7A98A8] mb-1">💡 Structure SQL requise</p>
-                  <pre className="font-mono text-[11px] text-[#38BDF8]/70 whitespace-pre-wrap leading-relaxed">{`CREATE TABLE IF NOT EXISTS admin_auth (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  username TEXT NOT NULL UNIQUE,
-  email TEXT,
-  password_hash TEXT NOT NULL,
-  salt TEXT NOT NULL,
-  role TEXT NOT NULL DEFAULT 'viewer',
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
-);`}</pre>
+                  <p className="font-semibold text-[#7A98A8] mb-1">💡 Migration automatique</p>
+                  <p className="text-[#4A6878] mb-2">Les colonnes <code className="text-sky-400">username</code>, <code className="text-sky-400">email</code>, <code className="text-sky-400">role</code>, <code className="text-sky-400">created_at</code> sont ajoutées automatiquement à votre table existante <code className="text-sky-400">admin_auth</code>. Si besoin, copiez ce script dans le SQL Editor Supabase :</p>
+                  <pre className="font-mono text-[11px] text-[#38BDF8]/70 whitespace-pre-wrap leading-relaxed">{`ALTER TABLE admin_auth
+  ADD COLUMN IF NOT EXISTS username TEXT,
+  ADD COLUMN IF NOT EXISTS email TEXT,
+  ADD COLUMN IF NOT EXISTS role TEXT NOT NULL DEFAULT 'admin',
+  ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT NOW();`}</pre>
                 </div>
               </div>
             )}
