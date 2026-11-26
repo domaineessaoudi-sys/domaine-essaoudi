@@ -709,7 +709,7 @@ export function AdminPage() {
             <div className="flex items-center gap-2 sm:gap-3">
               <button
                 type="button"
-                onClick={() => navigate('/')}
+                onClick={() => window.open('/', '_blank', 'noopener,noreferrer')}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border border-[#1E3444] bg-[#12222B] text-[#EEF6FA] hover:bg-[#162833] transition-colors"
                 title="Retourner au site public"
               >
@@ -782,9 +782,9 @@ export function AdminPage() {
   return (
     <div className="admin-theme dark min-h-screen p-2 sm:p-5 lg:p-7 flex justify-center items-start bg-[#070E13]">
       {/* Main Dashboard Canvas Shell (Floating Card from design) */}
-      <div className="w-full bg-[#0D171F] rounded-[32px] sm:rounded-[36px] border border-[#1E3444] shadow-[0_25px_60px_rgba(0,0,0,0.65)] overflow-hidden flex flex-col">
-        {/* Top Header Bar inside Shell */}
-        <header className="h-20 border-b border-[#182B37] px-4 sm:px-8 flex items-center justify-between gap-4 bg-[#0D171F]/90 backdrop-blur-md shrink-0">
+      <div className="w-full bg-[#0D171F] rounded-[32px] sm:rounded-[36px] border border-[#1E3444] shadow-[0_25px_60px_rgba(0,0,0,0.65)] flex flex-col">
+        {/* Top Header Bar inside Shell — overflow:visible so the notif dropdown can escape */}
+        <header className="h-20 border-b border-[#182B37] px-4 sm:px-8 flex items-center justify-between gap-4 bg-[#0D171F]/90 backdrop-blur-md shrink-0 rounded-t-[32px] sm:rounded-t-[36px] relative z-40">
           {/* Left Brand + Active Section */}
           <div className="flex items-center gap-3 sm:gap-4 min-w-0">
             <div className="flex items-center gap-2.5">
@@ -844,7 +844,7 @@ export function AdminPage() {
 
               {/* ===== Notification Dropdown Panel ===== */}
               {notifOpen && (
-                <div className="absolute end-0 top-12 w-80 sm:w-96 bg-[#0D171F] border border-[#1E3444] rounded-2xl shadow-2xl shadow-black/60 z-50 overflow-hidden">
+                <div className="absolute end-0 top-12 w-80 sm:w-96 bg-[#0D171F] border border-[#1E3444] rounded-2xl shadow-2xl shadow-black/60 z-[200] overflow-hidden">
                   {/* Header */}
                   <div className="flex items-center justify-between px-4 py-3 border-b border-[#1E3444]">
                     <div className="flex items-center gap-2">
