@@ -1610,10 +1610,13 @@ function verifyAdminPassword(password) {
   }
   return false;
 }
-function issueAdminSession() {
+function issueAdminSession(user) {
   const payload = {
     exp: Date.now() + 24 * 60 * 60 * 1e3,
-    rnd: crypto2.randomBytes(16).toString("hex")
+    rnd: crypto2.randomBytes(16).toString("hex"),
+    id: user?.id,
+    username: user?.username || "Admin Said",
+    role: user?.role || "admin"
   };
   const body = Buffer.from(JSON.stringify(payload)).toString("base64url");
   const sig = crypto2.createHmac("sha256", SESSION_SIGN_SECRET).update(body).digest("base64url");
@@ -1627,6 +1630,24 @@ function issueAdminSession() {
   } catch {
   }
   return token;
+}
+function decodeSessionPayload(rawToken) {
+  if (!rawToken || typeof rawToken !== "string") return null;
+  const parts = rawToken.split(".");
+  if (parts.length === 2) {
+    const [body, sig] = parts;
+    const expectedSig = crypto2.createHmac("sha256", SESSION_SIGN_SECRET).update(body).digest("base64url");
+    if (sig === expectedSig) {
+      try {
+        const payload = JSON.parse(Buffer.from(body, "base64url").toString("utf8"));
+        if (payload.exp && Date.now() < payload.exp) {
+          return payload;
+        }
+      } catch {
+      }
+    }
+  }
+  return null;
 }
 function verifySessionToken(rawToken) {
   if (!rawToken || typeof rawToken !== "string") return false;
@@ -2416,14 +2437,53 @@ app.post("/api/contact", async (req, res) => {
     });
   }
 });
+async function supabaseAuthRest(pathWithQuery, options = {}) {
+  const cfg = getStoredSupabaseConfig();
+  if (!cfg.projectUrl || !cfg.serviceRoleKey) {
+    throw new Error("Supabase Project URL ou Service Role Key manquante.");
+  }
+  const headers = {
+    apikey: cfg.serviceRoleKey,
+    Authorization: `Bearer ${cfg.serviceRoleKey}`
+  };
+  if (options.body !== void 0) {
+    headers["Content-Type"] = "application/json";
+  }
+  if (options.prefer) {
+    headers.Prefer = options.prefer;
+  }
+  const res = await fetch(`${cfg.projectUrl}/rest/v1/${pathWithQuery}`, {
+    method: options.method || "GET",
+    headers,
+    body: options.body !== void 0 ? JSON.stringify(options.body) : void 0
+  });
+  const text = await res.text().catch(() => "");
+  let data = null;
+  if (text) {
+    try {
+      data = JSON.parse(text);
+    } catch {
+      data = text;
+    }
+  }
+  if (!res.ok) {
+    const msg = typeof data === "object" && data?.message ? data.message : text || `HTTP ${res.status}`;
+    throw new Error(msg);
+  }
+  return data;
+}
 app.get("/api/admin/auth-status", (req, res) => {
+  const token = extractBearerToken(req);
   const status = getAuthConfigurationStatus();
-  const authenticated = verifySessionToken(extractBearerToken(req));
+  const authenticated = verifySessionToken(token);
+  const session = authenticated ? decodeSessionPayload(token) : null;
   res.json({
     configured: status.envConfigured || status.claimed,
     envConfigured: status.envConfigured,
     claimed: status.claimed,
-    authenticated
+    authenticated,
+    username: session?.username || "Said Essaoudi",
+    role: session?.role || "admin"
   });
 });
 app.post("/api/admin/claim", (req, res) => {
@@ -2440,18 +2500,86 @@ app.post("/api/admin/claim", (req, res) => {
   const token = issueAdminSession();
   res.status(201).json({ token });
 });
-app.post("/api/admin/login", (req, res) => {
-  const password = String(req.body?.password || "");
-  if (!password) {
-    res.status(400).json({ error: "Password is required." });
-    return;
+app.post("/api/admin/login", async (req, res) => {
+  try {
+    const email = String(req.body?.email || req.body?.username || "").trim();
+    const password = String(req.body?.password || "");
+    if (!password) {
+      res.status(400).json({ error: "Le mot de passe est requis." });
+      return;
+    }
+    let matchedUser = null;
+    if (email) {
+      const rows = await supabaseAuthRest(
+        `admin_auth?or=(email.ilike.${encodeURIComponent(email)},username.ilike.${encodeURIComponent(email)})&limit=1`
+      ).catch(() => []);
+      if (Array.isArray(rows) && rows.length > 0) {
+        matchedUser = rows[0];
+      }
+    }
+    if (matchedUser) {
+      const salt = matchedUser.salt || "";
+      const storedHash = matchedUser.password_hash || "";
+      let valid = false;
+      if (salt && storedHash) {
+        const hmac = crypto3.createHmac("sha256", salt).update(password).digest("hex");
+        if (hmac === storedHash) valid = true;
+        if (!valid) {
+          try {
+            const scrypt = crypto3.scryptSync(password, salt, 64).toString("hex");
+            if (scrypt === storedHash) valid = true;
+          } catch {
+          }
+        }
+      }
+      if (!valid && verifyAdminPassword(password)) {
+        valid = true;
+      }
+      if (!valid) {
+        res.status(401).json({ error: "Email ou mot de passe incorrect." });
+        return;
+      }
+      const username = matchedUser.username || email;
+      const token = issueAdminSession({
+        id: matchedUser.id,
+        username,
+        role: matchedUser.role || "admin"
+      });
+      res.json({
+        token,
+        user: {
+          id: matchedUser.id,
+          username,
+          email: matchedUser.email || "",
+          role: matchedUser.role || "admin"
+        }
+      });
+      return;
+    }
+    if (verifyAdminPassword(password)) {
+      const adminRows = await supabaseAuthRest("admin_auth?select=id,username,email,role&order=id.asc&limit=1").catch(() => []);
+      const primaryAdmin = Array.isArray(adminRows) && adminRows.length > 0 ? adminRows[0] : null;
+      const username = primaryAdmin?.username || "Said Essaoudi";
+      const token = issueAdminSession({
+        id: primaryAdmin?.id || 1,
+        username,
+        role: primaryAdmin?.role || "admin"
+      });
+      res.json({
+        token,
+        user: {
+          id: primaryAdmin?.id || 1,
+          username,
+          email: primaryAdmin?.email || email || "",
+          role: primaryAdmin?.role || "admin"
+        }
+      });
+      return;
+    }
+    res.status(401).json({ error: "Email ou mot de passe incorrect." });
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : "Erreur d\u2019authentification." });
   }
-  if (!verifyAdminPassword(password)) {
-    res.status(401).json({ error: "Invalid administrator password." });
-    return;
-  }
-  const token = issueAdminSession();
-  res.json({ token });
 });
 app.post("/api/admin/logout", (req, res) => {
   revokeSessionToken(extractBearerToken(req));
@@ -2745,41 +2873,6 @@ app.patch("/api/admin/messages/:id", requireAdmin, async (req, res) => {
     });
   }
 });
-async function supabaseAuthRest(pathWithQuery, options = {}) {
-  const cfg = getStoredSupabaseConfig();
-  if (!cfg.projectUrl || !cfg.serviceRoleKey) {
-    throw new Error("Supabase Project URL ou Service Role Key manquante.");
-  }
-  const headers = {
-    apikey: cfg.serviceRoleKey,
-    Authorization: `Bearer ${cfg.serviceRoleKey}`
-  };
-  if (options.body !== void 0) {
-    headers["Content-Type"] = "application/json";
-  }
-  if (options.prefer) {
-    headers.Prefer = options.prefer;
-  }
-  const res = await fetch(`${cfg.projectUrl}/rest/v1/${pathWithQuery}`, {
-    method: options.method || "GET",
-    headers,
-    body: options.body !== void 0 ? JSON.stringify(options.body) : void 0
-  });
-  const text = await res.text().catch(() => "");
-  let data = null;
-  if (text) {
-    try {
-      data = JSON.parse(text);
-    } catch {
-      data = text;
-    }
-  }
-  if (!res.ok) {
-    const msg = typeof data === "object" && data?.message ? data.message : text || `HTTP ${res.status}`;
-    throw new Error(msg);
-  }
-  return data;
-}
 app.get("/api/admin/users", requireAdmin, async (_req, res) => {
   try {
     const rows = await supabaseAuthRest("admin_auth?select=id,username,email,role,created_at,updated_at&order=id.desc");
@@ -2812,10 +2905,19 @@ app.post("/api/admin/users", requireAdmin, async (req, res) => {
     const salt = crypto3.randomBytes(16).toString("hex");
     const passwordHash = crypto3.createHmac("sha256", salt).update(password).digest("hex");
     const now = (/* @__PURE__ */ new Date()).toISOString();
+    const maxRows = await supabaseAuthRest("admin_auth?select=id&order=id.desc&limit=1").catch(() => []);
+    let nextId = 1;
+    if (Array.isArray(maxRows) && maxRows.length > 0) {
+      const topId = Number(maxRows[0]?.id);
+      if (Number.isFinite(topId)) {
+        nextId = topId + 1;
+      }
+    }
     const inserted = await supabaseAuthRest("admin_auth", {
       method: "POST",
       prefer: "return=representation",
       body: {
+        id: nextId,
         username: username.trim(),
         email: (email || "").trim(),
         password_hash: passwordHash,

@@ -67,10 +67,13 @@ export function verifyAdminPassword(password: string): boolean {
   return false;
 }
 
-export function issueAdminSession(): string {
+export function issueAdminSession(user?: { id?: string | number; username?: string; role?: string }): string {
   const payload = {
     exp: Date.now() + 24 * 60 * 60 * 1000,
     rnd: crypto.randomBytes(16).toString('hex'),
+    id: user?.id,
+    username: user?.username || 'Admin Said',
+    role: user?.role || 'admin',
   };
   const body = Buffer.from(JSON.stringify(payload)).toString('base64url');
   const sig = crypto.createHmac('sha256', SESSION_SIGN_SECRET).update(body).digest('base64url');
@@ -87,6 +90,29 @@ export function issueAdminSession(): string {
   }
 
   return token;
+}
+
+export function decodeSessionPayload(rawToken: string | undefined): { username?: string; role?: string; id?: string | number } | null {
+  if (!rawToken || typeof rawToken !== 'string') return null;
+  const parts = rawToken.split('.');
+  if (parts.length === 2) {
+    const [body, sig] = parts;
+    const expectedSig = crypto
+      .createHmac('sha256', SESSION_SIGN_SECRET)
+      .update(body)
+      .digest('base64url');
+    if (sig === expectedSig) {
+      try {
+        const payload = JSON.parse(Buffer.from(body, 'base64url').toString('utf8'));
+        if (payload.exp && Date.now() < payload.exp) {
+          return payload;
+        }
+      } catch {
+        // ignore
+      }
+    }
+  }
+  return null;
 }
 
 export function verifySessionToken(rawToken: string | undefined): boolean {

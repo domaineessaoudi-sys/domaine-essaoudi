@@ -163,7 +163,11 @@ export function AdminPage() {
 
   const [authChecking, setAuthChecking] = useState(true);
   const [configured, setConfigured] = useState(true);
+  const [emailInput, setEmailInput] = useState('');
   const [passwordInput, setPasswordInput] = useState('');
+  const [currentUsername, setCurrentUsername] = useState<string>(() => {
+    return localStorage.getItem('admin_username') || 'Said Essaoudi';
+  });
   const [authError, setAuthError] = useState<string | null>(null);
   const [authSubmitting, setAuthSubmitting] = useState(false);
 
@@ -270,6 +274,10 @@ export function AdminPage() {
       if (res.ok) {
         const data = await res.json();
         setConfigured(Boolean(data.configured));
+        if (data.username) {
+          setCurrentUsername(data.username);
+          localStorage.setItem('admin_username', data.username);
+        }
         if (adminToken && !data.authenticated) {
           setAdminToken(null);
         }
@@ -371,10 +379,8 @@ export function AdminPage() {
   const handleAuthSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setAuthError(null);
-    if (passwordInput.length < (configured ? 1 : 6)) {
-      setAuthError(
-        configured ? 'Please enter your password.' : 'Password must be at least 6 characters.'
-      );
+    if (!passwordInput) {
+      setAuthError('Veuillez saisir votre mot de passe.');
       return;
     }
 
@@ -384,18 +390,25 @@ export function AdminPage() {
       const res = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password: passwordInput }),
+        body: JSON.stringify({
+          email: emailInput.trim(),
+          password: passwordInput,
+        }),
       });
       const data = await res.json();
       if (!res.ok) {
-        setAuthError(data.error || 'Authentication failed.');
+        setAuthError(data.error || 'Identifiants incorrects.');
         return;
       }
       setAdminToken(data.token);
+      if (data.user?.username) {
+        setCurrentUsername(data.user.username);
+        localStorage.setItem('admin_username', data.user.username);
+      }
       setConfigured(true);
       setPasswordInput('');
     } catch {
-      setAuthError('Network error during authentication.');
+      setAuthError('Erreur de connexion au serveur.');
     } finally {
       setAuthSubmitting(false);
     }
@@ -409,6 +422,7 @@ export function AdminPage() {
       }).catch(() => { });
     }
     setAdminToken(null);
+    localStorage.removeItem('admin_username');
   };
 
   // ---- Users handlers ----
@@ -832,6 +846,24 @@ export function AdminPage() {
             <form onSubmit={handleAuthSubmit} className="space-y-4">
               <div>
                 <label
+                  htmlFor="admin-email"
+                  className="block text-xs font-semibold text-[#8AA4B4] mb-1.5"
+                >
+                  Email ou nom d'utilisateur
+                </label>
+                <input
+                  id="admin-email"
+                  type="text"
+                  autoComplete="username"
+                  value={emailInput}
+                  onChange={(e) => setEmailInput(e.target.value)}
+                  className="w-full px-3.5 py-2.5 text-sm rounded-lg border border-[#1E3444] bg-[#0B151C] text-white focus:outline-none focus:border-sky-500 placeholder:text-[#374F5E]"
+                  placeholder="ex: domaineessaoudi@gmail.com"
+                />
+              </div>
+
+              <div>
+                <label
                   htmlFor="admin-password"
                   className="block text-xs font-semibold text-[#8AA4B4] mb-1.5"
                 >
@@ -840,6 +872,7 @@ export function AdminPage() {
                 <input
                   id="admin-password"
                   type="password"
+                  required
                   autoComplete={configured ? 'current-password' : 'new-password'}
                   value={passwordInput}
                   onChange={(e) => setPasswordInput(e.target.value)}
@@ -1048,15 +1081,20 @@ export function AdminPage() {
 
             {/* User Greeting & Avatar */}
             <div className="flex items-center gap-2.5 ps-1 sm:ps-2">
-              <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-[#0284C7] to-[#38BDF8] text-white flex items-center justify-center font-bold text-xs ring-2 ring-[#1E3444] shadow-xs shrink-0">
-                SA
+              <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-[#0284C7] to-[#38BDF8] text-white flex items-center justify-center font-bold text-xs ring-2 ring-[#1E3444] shadow-xs shrink-0 uppercase">
+                {currentUsername
+                  .split(' ')
+                  .map((w) => w[0])
+                  .filter(Boolean)
+                  .slice(0, 2)
+                  .join('') || 'AD'}
               </div>
               <div className="text-start hidden lg:block">
                 <div className="text-[10px] text-[#7A98A8] leading-none">
                   Bonjour,
                 </div>
-                <div className="text-xs font-bold text-[#E2EFF7] leading-tight mt-0.5">
-                  Admin Said
+                <div className="text-xs font-bold text-[#E2EFF7] leading-tight mt-0.5 max-w-[140px] truncate" title={currentUsername}>
+                  {currentUsername}
                 </div>
               </div>
             </div>
